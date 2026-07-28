@@ -20,6 +20,11 @@ export interface Bomb {
     pools: Pool[];
 }
 
+export interface ModuleEntry {
+    percentage: number; //Positive integer. Must sum up to 100. Needs to have the same number as moduleNames
+    moduleName: string; //needs to be a valid module name. Needs to have the same number as percentages
+}
+
 export type PoolType = 'Preset' | 'Pool' | 'Module Name';
 export type PresetType = 'All Solvable' | 'All Needy' | 'All Vanilla' | 'All Mods' | 'All Vanilla Needy' | 'All Mods Needy' | 'Profile' | 'Needy Profile'
 export interface Pool {
@@ -28,7 +33,8 @@ export interface Pool {
     distinct: boolean;
     presetType?: PresetType;
     profileName?: string;
-    percentages?: Number[]; //Positive integer. Must sum up to 100. Needs to have the same number as moduleNames
-    moduleNames?: string[]; //needs to be a valid module name. Needs to have the same number as percentages
+    percentages?: Number[];
+    moduleNames?: string[];
+    entries?: ModuleEntry[];
 }
 
