@@ -1,0 +1,1 @@
+// mission state: Holds all Bombs/Pools
