@@ -2,7 +2,7 @@ import { ModuleInfo } from "./types";
 
 
 let modules: ModuleInfo[] = [];
-const modulesByName = new Map<string, ModuleInfo>()
+const modulesByName = new Map<string, ModuleInfo>();
 
 export async function loadModules(): Promise<void> {
     const response = await fetch("https://ktane.timwi.de/json/raw");
@@ -13,6 +13,8 @@ export async function loadModules(): Promise<void> {
 
     let json = await response.json();
     modules = json["KtaneModules"]
+
+    modules = modules.filter(mod => ["Needy", "Regular"].includes(mod.Type)).sort((a, b) => a.Name.localeCompare(b.Name));
 
     for(let module of modules) {
         modulesByName.set(module.Name, module)

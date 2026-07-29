@@ -39,6 +39,7 @@ export interface Pool {
 export interface ModuleInfo {
     Name: string;
     ModuleID: string;
+    Type: string;
 }
 
 export const modulesByName = new Map<string, ModuleInfo>();
