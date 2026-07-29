@@ -186,12 +186,12 @@ function createModuleEntryElement(): HTMLDivElement {
 
     entry.innerHTML = `
         <label>
-            Percentage
+            Weight
             <input
                 type="number"
                 min="1"
-                max="100"
-                value="100">
+                max="50"
+                value="1">
         </label>
 
         <label>

@@ -1,156 +1,231 @@
 // Todo for deletion of module entry, bomb, or pool, have confirmation prompt
-// todo change the html so all of the form inputs (including global settings) won't appear until the loading is done. So only the name of the website and the loading elements will be visible
-// todo show all verification errors at once
 // todo add import for dmg
 
 import { getModulesByName } from "./modules.js";
 import { Bomb } from "./types";
 
+const FIELD_INVALID_CLASS = "field-invalid";
+const FIELD_ERROR_CLASS = "field-error";
 
-// Verification (will hold a list of errors and show them at the end)
-export function verifyFormInformation() {
-    const modulesByName = getModulesByName();
-    let errors: string[] = []; 
-    const inputs = document.querySelectorAll<HTMLInputElement>("#global-settings input");
+// Clears every validation marker (invalid labels/fieldsets and error messages)
+// left over from a previous validation pass.
+function clearAllFieldErrors(): void {
+    document
+        .querySelectorAll(`.${FIELD_INVALID_CLASS}`)
+        .forEach(el => el.classList.remove(FIELD_INVALID_CLASS));
 
-    
-    // todo verify mission name trimmed is not blank
-    const missionName = inputs[0].value.trim();
+    document
+        .querySelectorAll(`.${FIELD_ERROR_CLASS}`)
+        .forEach(el => el.remove());
+}
 
-    if(missionName.length == 0) {
-        errors.push("Mission name is empty");
+// Marks the <label> wrapping an input/select as invalid (turns the element
+// name red) and puts the error message right after it, red as well. If the
+// element isn't wrapped in a label, falls back to marking the element itself.
+function markFieldInvalid(element: Element | null, message: string): void {
+    if (!element) {
+        return;
     }
 
-    // todo verify mission description trimmed is not blank
+    const label = element.closest("label");
+    const target = label ?? element;
+
+    target.classList.add(FIELD_INVALID_CLASS);
+
+    let errorSpan = target.nextElementSibling as HTMLElement | null;
+
+    if (!errorSpan || !errorSpan.classList.contains(FIELD_ERROR_CLASS)) {
+        errorSpan = document.createElement("span");
+        errorSpan.className = FIELD_ERROR_CLASS;
+        target.after(errorSpan);
+    }
+
+    // Multiple errors can apply to the same field (e.g. weight must be an
+    // integer AND within range) - append rather than overwrite.
+    errorSpan.textContent = errorSpan.textContent
+        ? `${errorSpan.textContent} ${message}`
+        : message;
+}
+
+// Same idea as markFieldInvalid, but for a whole fieldset (e.g. the bomb
+// time group of four inputs) where a single error applies to the group.
+// The message is placed right after the legend.
+function markFieldsetInvalid(fieldset: HTMLFieldSetElement, message: string): void {
+    fieldset.classList.add(FIELD_INVALID_CLASS);
+
+    let errorSpan = fieldset.querySelector<HTMLElement>(`:scope > .${FIELD_ERROR_CLASS}`);
+
+    if (!errorSpan) {
+        errorSpan = document.createElement("span");
+        errorSpan.className = FIELD_ERROR_CLASS;
+        const legend = fieldset.querySelector("legend");
+        if (legend) {
+            legend.after(errorSpan);
+        } else {
+            fieldset.prepend(errorSpan);
+        }
+    }
+
+    errorSpan.textContent = errorSpan.textContent
+        ? `${errorSpan.textContent} ${message}`
+        : message;
+}
+
+// Verification - shows every error at once, at the element it belongs to.
+// Returns true if the form is valid.
+export function verifyFormInformation(): boolean {
+    clearAllFieldErrors();
+
+    const modulesByName = getModulesByName();
+    let errors: string[] = [];
+    const inputs = document.querySelectorAll<HTMLInputElement>("#global-settings input");
+
+    //verify mission name trimmed is not blank
+    const missionName = inputs[0].value.trim();
+
+    if (missionName.length == 0) {
+        errors.push("Mission name is empty");
+        markFieldInvalid(inputs[0], "Mission name is empty");
+    }
+
+    //verify mission description trimmed is not blank
     const missionDescription = inputs[1].value.trim();
 
-    if(missionDescription.length == 0) {
+    if (missionDescription.length == 0) {
         errors.push("Mission Description is empty");
+        markFieldInvalid(inputs[1], "Mission Description is empty");
     }
 
     const room = inputs[2].value.trim();
     const frontOnly = inputs[3].checked;
 
-    // todo for each bomb,
-    let bombs: Bomb[] = [] 
+    //for each bomb,
+    let bombs: Bomb[] = []
     let bombFieldSets = document.querySelectorAll<HTMLFieldSetElement>("#bomb-list fieldset.bomb")
 
-    for(let bombFieldSet of bombFieldSets)
-    {
+    for (let bombFieldSet of bombFieldSets) {
         const bombInputs = bombFieldSet.querySelectorAll<HTMLInputElement>("input")
 
         // Bomb Time is max 6 days
         const DAYS_TO_SECONDS = 86400;
-        const days =    parseInt(bombInputs[0].value);
-        const hours =   parseInt(bombInputs[1].value);
+        const days = parseInt(bombInputs[0].value);
+        const hours = parseInt(bombInputs[1].value);
         const minutes = parseInt(bombInputs[2].value);
         const seconds = parseInt(bombInputs[3].value);
 
-        const totalBombTime = days * DAYS_TO_SECONDS + 
-                              hours * 3600 +
-                              minutes * 60 + 
-                              seconds;
+        const totalBombTime = days * DAYS_TO_SECONDS +
+            hours * 3600 +
+            minutes * 60 +
+            seconds;
 
-        if(totalBombTime / DAYS_TO_SECONDS > 6) {
+        if (totalBombTime / DAYS_TO_SECONDS > 6) {
             errors.push("Bomb time cannot go above 6 days")
+
+            const bombTimeFieldset = bombFieldSet.querySelector<HTMLFieldSetElement>(".bomb-time")!;
+            markFieldsetInvalid(bombTimeFieldset, "Bomb time cannot go above 6 days");
         }
 
-        // todo strikes is at least 1
+        //strikes is at least 1
         const strikes = parseInt(bombInputs[4].value);
 
-        if(strikes < 1) {
+        if (strikes < 1) {
             errors.push("Strikes cannot be below 1")
+            markFieldInvalid(bombInputs[4], "Strikes cannot be below 1");
         }
 
-        // todo Widgets is at least 0
+        //Widgets is at least 0
         const widgets = parseInt(bombInputs[5].value);
 
-        if(widgets < 1) {
-            errors.push("Widgets cannot be below 1")
+        if (widgets < 0) {
+            errors.push("Widgets cannot be below 0")
+            markFieldInvalid(bombInputs[5], "Widgets cannot be below 0");
         }
 
-        // todo needy activation time is at least 0 
+        //needy activation time is at least 0 
         const needy = parseInt(bombInputs[6].value);
 
-        if(needy < 0) {
-            errors.push("needy cannot be below 0")
+        if (needy < 0) {
+            errors.push("Needy Activation Time cannot be below 0 seconds")
+            markFieldInvalid(bombInputs[6], "Needy Activation Time cannot be below 0 seconds");
         }
 
-        const poolFieldSets = bombFieldSet.querySelectorAll<HTMLFieldSetElement>("#pool-list fieldset.pool")
+        const poolFieldSets = bombFieldSet.querySelectorAll<HTMLFieldSetElement>(".pool-list fieldset.pool")
 
-        // todo for each Pool
-        for(let poolFieldSet of poolFieldSets) 
-        {
+        //for each Pool
+        for (let poolFieldSet of poolFieldSets) {
             const poolInputs = poolFieldSet.querySelectorAll<HTMLInputElement>("input")
 
-            //todo verify occurrence is at least 1
+            //verify occurrence is at least 1
             const occurrences = parseInt(poolInputs[0].value);
 
-            if(occurrences < 1) {
+            if (occurrences < 1) {
                 errors.push("Occurrences cannot be below 1")
+                markFieldInvalid(poolInputs[0], "Occurrences cannot be below 1");
             }
 
             const poolType = poolFieldSet.querySelector<HTMLSelectElement>(".pool-type")!.value
 
-            switch(poolType)
-            {
-                // todo if type is "preset"
+            switch (poolType) {
+                //if type is "preset"
                 case 'Preset':
-                    // todo preset is "profile" or "needy profile", verify json input is not empty
+                    //preset is "profile" or "needy profile", verify json input is not empty
                     const presetType = poolFieldSet.querySelector<HTMLSelectElement>(".preset-type")!.value
 
-                    if(["Profile", "Needy Profile"].includes(presetType)) {
-                        const fileList = (poolFieldSet.querySelector<HTMLInputElement>('input[type="file"]')!.files as FileList)
+                    if (["Profile", "Needy Profile"].includes(presetType)) {
+                        const fileInput = poolFieldSet.querySelector<HTMLInputElement>('input[type="file"]')!;
+                        const fileList = (fileInput.files as FileList)
 
-                        if(fileList.length < 1) {
+                        if (fileList.length < 1) {
                             errors.push("There must be profile attached")
+                            markFieldInvalid(fileInput, "There must be profile attached");
                         }
                     }
-                break;
+                    break;
 
-                // todo if type is "pool"
+                //if type is "pool"
                 case 'Pool':
-                    // todo for each module entry
+                    //for each module entry
                     const modEntries = poolFieldSet.querySelectorAll<HTMLDivElement>('.module-entry')
                     let percentages = [];
-                    for(let modEntry of modEntries) {
+                    for (let modEntry of modEntries) {
                         const modEntryInputs = modEntry.querySelectorAll<HTMLInputElement>("input")
-                        // todo verify module name is one of the ones loaded from the json
+                        //verify module name is one of the ones loaded from the json
                         const moduleName = modEntryInputs[1].value
 
-                        if(!modulesByName.has(moduleName)) {
-                            errors.push(`${modulesByName} is not a valid module name.`)
+                        if (!modulesByName.has(moduleName)) {
+                            errors.push(`"${moduleName}" is not a valid module name.`)
+                            markFieldInvalid(modEntryInputs[1], `"${moduleName}" is not a valid module name.`);
                         }
-                        
-                        // todo verify percentage is between 0 - 100. Only taking integers for now
-                        const modulePercentage = parseInt(modEntryInputs[0].value)
 
-                        if(modulePercentage < 0 || modulePercentage > 100) {
-                            errors.push("Module percentage should be between 0 and 100 inclusively")
+                        //verify weight is an integer
+                        const moduleWeight = parseInt(modEntryInputs[0].value)
+
+                        if (moduleWeight != Number(modEntryInputs[0].value)) {
+                            errors.push(`Weight must be an integer.`)
+                            markFieldInvalid(modEntryInputs[0], "Weight must be an integer.");
                         }
-                        percentages.push(modulePercentage)
-                    }
-                    // todo verify percentage sums to 100
-                    const modulePercentageSum = percentages.reduce((accumulator, currentValue) => {
-                        return accumulator + currentValue;
-                    })
 
-                    if(modulePercentageSum != 100) {
-                        errors.push(`Module percentage needs to total to 100. Got ${modulePercentageSum}`);
+                        //verify the weight is between 1 - 50. 
+                        if (moduleWeight < 1 || moduleWeight > 50) {
+                            errors.push("Module weight should be between 1 and 50 inclusively")
+                            markFieldInvalid(modEntryInputs[0], "Module weight should be between 1 and 50 inclusively");
+                        }
+                        percentages.push(moduleWeight)
                     }
-                break;
+                    break;
 
-                // todo if type is "Module Name"
+                //if type is "Module Name"
                 case 'Module Name':
-                // todo verify module name is not empty
-                const moduleName = poolFieldSet.querySelector<HTMLInputElement>('input')!.value
-                if(!modulesByName.has(moduleName)) {
-                            errors.push(`${modulesByName} is not a valid module name.`)
-                }
-                break;
+                    //verify module name is not empty
+                    const moduleName = poolInputs[2].value
+                    if (!modulesByName.has(moduleName)) {
+                        errors.push(`"${moduleName}" is not a valid module name.`)
+                        markFieldInvalid(poolInputs[2], `"${moduleName}" is not a valid module name.`);
+                    }
+                    break;
             }
         }
     }
 
-    console.log(errors)
+    return errors.length === 0;
 }

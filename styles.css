@@ -393,6 +393,42 @@ fieldset.pool > legend {
     flex: 1 1 160px;
 }
 
+/* ------------------------------ validation ------------------------------- */
+
+label.field-invalid {
+    color: var(--red);
+}
+
+label.field-invalid input,
+label.field-invalid select {
+    border-color: var(--red);
+    box-shadow: 0 0 0 1px var(--red-glow);
+}
+
+fieldset.field-invalid {
+    border-color: var(--red);
+    box-shadow: 0 0 0 1px var(--red-glow);
+}
+
+fieldset.field-invalid > legend {
+    color: var(--red);
+}
+
+.field-error {
+    display: block;
+    margin: -8px 0 14px;
+
+    color: var(--red);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.02em;
+    text-transform: none;
+}
+
+fieldset > .field-error {
+    margin: 0 0 12px;
+}
+
 /* --------------------------------- buttons --------------------------------- */
 
 button {

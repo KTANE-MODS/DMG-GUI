@@ -20,7 +20,7 @@ export interface Mission {
 }
 
 export interface ModuleEntry {
-    percentage: number; //Positive integer. 
+    weight: number; //Positive integer. 
     moduleName: string; //needs to be a valid module name.
 }
 
@@ -40,7 +40,7 @@ export interface Pool {
     distinct: boolean;
     presetType?: PresetType;
     profileName?: string;
-    entries?: ModuleEntry[]; //Must sum up to 100.
+    entries?: ModuleEntry[];
 }
 
 export const modulesByName = new Map<string, ModuleInfo>();
