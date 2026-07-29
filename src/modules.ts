@@ -8,7 +8,7 @@ export async function loadModules(): Promise<void> {
     const response = await fetch("https://ktane.timwi.de/json/raw");
 
     if (!response.ok) {
-        throw new Error("Failed to load modules.");
+        throw new Error(`Server returned ${response.status} ${response.statusText}`);
     }
 
     let json = await response.json();
@@ -17,6 +17,7 @@ export async function loadModules(): Promise<void> {
     for(let module of modules) {
         modulesByName.set(module.Name, module)
     }
+
 
     createModuleDatalist();
 }
@@ -42,3 +43,4 @@ function createModuleDatalist(): void {
 export function getModules(): readonly ModuleInfo[] {
     return modules;
 }
+

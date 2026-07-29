@@ -1,24 +1,42 @@
 import { loadModules } from "./modules.js";
 import { createBombElement } from "./bomb.js";
 
-async function initialize() {
+const errorElement = document.querySelector<HTMLDivElement>("#error-message");
 
-    const loadingText = document.querySelector<HTMLDivElement>("#loading")!;
+function showLoadingError(error: unknown): void {
+    if (!errorElement) {
+        console.error(error);
+        return;
+    }
 
-    await loadModules();
+    const message = error instanceof Error
+            ? error.message
+            : "Unknown error";
 
-    const bombList =
-        document.querySelector<HTMLDivElement>("#bomb-list")!;
-
-    bombList.appendChild(createBombElement());
-
-    document
-        .querySelector("#add-bomb")!
-        .addEventListener("click", () => {
-
-            bombList.appendChild(createBombElement());
-
-        });
+    errorElement.textContent = `Failed to fetch module list: ${message}`;
 }
+
+async function initialize() {
+    try {
+        await loadModules();
+        const bombList = document.querySelector<HTMLDivElement>("#bomb-list")!;
+
+        bombList.appendChild(createBombElement());
+
+        document
+            .querySelector("#add-bomb")!
+            .addEventListener("click", () => {
+                bombList.appendChild(createBombElement());
+            });
+
+        errorElement!.hidden = true
+    }
+    catch (e) {
+        // Initialization failed.
+        // The error message has already been shown.
+        showLoadingError(e)
+    }
+}
+
 
 initialize();
