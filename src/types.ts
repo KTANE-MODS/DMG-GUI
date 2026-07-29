@@ -21,8 +21,8 @@ export interface Bomb {
 }
 
 export interface ModuleEntry {
-    percentage: number; //Positive integer. Must sum up to 100. Needs to have the same number as moduleNames
-    moduleName: string; //needs to be a valid module name. Needs to have the same number as percentages
+    percentage: number; //Positive integer. 
+    moduleName: string; //needs to be a valid module name.
 }
 
 export type PoolType = 'Preset' | 'Pool' | 'Module Name';
@@ -33,8 +33,12 @@ export interface Pool {
     distinct: boolean;
     presetType?: PresetType;
     profileName?: string;
-    percentages?: Number[];
-    moduleNames?: string[];
-    entries?: ModuleEntry[];
+    entries?: ModuleEntry[]; //Must sum up to 100.
 }
 
+export interface ModuleInfo {
+    Name: string;
+    ModuleID: string;
+}
+
+export const modulesByName = new Map<string, ModuleInfo>();

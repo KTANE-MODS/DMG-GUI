@@ -1,4 +1,3 @@
-// Knows how to create a pool element
 export function createPoolElement(): HTMLFieldSetElement {
 
     const pool = document.createElement("fieldset");
@@ -124,7 +123,7 @@ function renderModuleNameOptions(
     container.innerHTML = `
         <label>
             Module Name
-            <input type="text">
+            <input type="text" list="module-list">
         </label>
     `;
 }
@@ -183,7 +182,7 @@ function createModuleEntryElement(): HTMLDivElement {
 
         <label>
             Module Name
-            <input type="text">
+            <input type="text" list="module-list">
         </label>
 
         <button

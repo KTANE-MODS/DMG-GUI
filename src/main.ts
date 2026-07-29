@@ -1,17 +1,24 @@
-//  Starts the application
-import { createBombElement } from "./ui/bomb.js";
+import { loadModules } from "./modules.js";
+import { createBombElement } from "./bomb.js";
 
-const bombList =
-    document.querySelector<HTMLDivElement>("#bomb-list")!;
+async function initialize() {
 
-const addBombButton =
-    document.querySelector<HTMLButtonElement>("#add-bomb")!;
+    const loadingText = document.querySelector<HTMLDivElement>("#loading")!;
 
-addBombButton.addEventListener("click", () => {
+    await loadModules();
+
+    const bombList =
+        document.querySelector<HTMLDivElement>("#bomb-list")!;
 
     bombList.appendChild(createBombElement());
 
-});
+    document
+        .querySelector("#add-bomb")!
+        .addEventListener("click", () => {
 
-// Every mission starts with one bomb
-bombList.appendChild(createBombElement());
+            bombList.appendChild(createBombElement());
+
+        });
+}
+
+initialize();

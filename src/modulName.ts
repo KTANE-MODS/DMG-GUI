@@ -5,7 +5,7 @@ function renderModuleNameOptions(
     container.innerHTML = `
         <label>
             Module Name
-            <input type="text">
+            <input type="text" list="module-list">
         </label>
     `;
 }
