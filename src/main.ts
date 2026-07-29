@@ -32,8 +32,6 @@ async function initialize() {
         errorElement!.hidden = true
     }
     catch (e) {
-        // Initialization failed.
-        // The error message has already been shown.
         showLoadingError(e)
     }
 }

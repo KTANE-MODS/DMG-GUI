@@ -12,8 +12,6 @@ export function createPoolElement(): HTMLFieldSetElement {
             <input type="number" value="1">
         </label>
 
-        <br><br>
-
         <label>
             Pool Type
             <select class="pool-type">
@@ -23,8 +21,6 @@ export function createPoolElement(): HTMLFieldSetElement {
             </select>
         </label>
 
-        <br><br>
-
         <label>
             <input type="checkbox">
             Distinct
@@ -33,8 +29,6 @@ export function createPoolElement(): HTMLFieldSetElement {
         <hr>
 
         <div class="pool-options"></div>
-
-        <br>
 
         <button
             class="remove-pool"
@@ -59,12 +53,8 @@ export function createPoolElement(): HTMLFieldSetElement {
     });
 
     pool
-        .querySelector<HTMLButtonElement>(".remove-pool")!
-        .addEventListener("click", () => {
-
-            pool.remove();
-
-        });
+    .querySelector<HTMLButtonElement>(".remove-pool")!
+    .addEventListener("click", () => { pool.remove(); });
 
     // Render the initial controls
     renderPoolOptions(poolType.value, options);
@@ -102,7 +92,7 @@ function renderPresetOptions(
     container.innerHTML = `
         <label>
             Preset
-            <select>
+            <select class="preset-type">
                 <option>All Solvable</option>
                 <option>All Needy</option>
                 <option>All Vanilla</option>
@@ -113,7 +103,33 @@ function renderPresetOptions(
                 <option>Needy Profile</option>
             </select>
         </label>
+
+        <div class="profile-upload" hidden>
+            <label>
+                Profile JSON
+                <input
+                    type="file"
+                    accept=".json,application/json">
+            </label>
+        </div>
     `;
+
+    const presetSelect =
+        container.querySelector<HTMLSelectElement>(".preset-type")!;
+
+    const profileUpload =
+        container.querySelector<HTMLDivElement>(".profile-upload")!;
+
+    function updateProfileUpload(): void {
+        profileUpload.hidden =
+            presetSelect.value !== "Profile" &&
+            presetSelect.value !== "Needy Profile";
+    }
+
+    presetSelect.addEventListener("change", updateProfileUpload);
+
+    // Set the initial visibility.
+    updateProfileUpload();
 }
 
 function renderModuleNameOptions(
@@ -134,8 +150,6 @@ function renderPoolEntries(
 
     container.innerHTML = `
         <div class="entry-list"></div>
-
-        <br>
 
         <button
             class="add-entry"
@@ -190,8 +204,6 @@ function createModuleEntryElement(): HTMLDivElement {
             type="button">
             Remove
         </button>
-
-        <br><br>
     `;
 
     entry
