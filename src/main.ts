@@ -1,5 +1,8 @@
 import { loadModules } from "./modules.js";
 import { createBombElement } from "./bomb.js";
+import { verifyFormInformation } from "./verification.js"
+
+const generateButton = document.querySelector<HTMLButtonElement>("#generate")!;
 
 const errorElement = document.querySelector<HTMLDivElement>("#error-message");
 
@@ -36,5 +39,8 @@ async function initialize() {
     }
 }
 
+generateButton.onclick = function() {
+  verifyFormInformation();
+};
 
 initialize();

@@ -39,3 +39,7 @@ export function getModules(): readonly ModuleInfo[] {
     return modules;
 }
 
+export function getModulesByName(): Map<string, ModuleInfo>{
+    return modulesByName
+}
+

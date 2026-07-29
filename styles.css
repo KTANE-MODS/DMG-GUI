@@ -446,7 +446,7 @@ button:active {
 
 /* generate mission — the big arm/detonate button */
 
-button[type="submit"] {
+button {
     display: block;
     width: 100%;
     padding: 18px;
@@ -466,11 +466,11 @@ button[type="submit"] {
     letter-spacing: 0.12em;
 }
 
-button[type="submit"]:hover {
+button:hover {
     filter: brightness(1.08);
 }
 
-button[type="submit"]:active {
+button:active {
     box-shadow:
         0 0 0 1px rgba(0, 0, 0, 0.4),
         0 2px 6px rgba(232, 56, 45, 0.35),
