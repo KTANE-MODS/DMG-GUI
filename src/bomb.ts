@@ -69,6 +69,8 @@ export function createBombElement(): HTMLFieldSetElement {
 
         <hr>
 
+        <div class="pool-list"></div>
+
         <button
             type="button"
             class="add-pool">
@@ -80,8 +82,6 @@ export function createBombElement(): HTMLFieldSetElement {
             class="remove-bomb">
             Remove Bomb
         </button>
-
-        <div class="pool-list"></div>
     `;
 
     const poolList = fieldset.querySelector(".pool-list")!;
