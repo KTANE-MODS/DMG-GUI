@@ -10,11 +10,48 @@ export function createBombElement(): HTMLFieldSetElement {
     fieldset.innerHTML = `
         <legend>Bomb</legend>
 
-        <label>
-            Bomb Time
-            <input type="number" value="300">
-        </label>
+        <fieldset class="bomb-time">
+            <legend>Bomb Time</legend>
 
+            <label>
+                Days
+                <input
+                    type="number"
+                    class="bomb-days"
+                    min="0"
+                    value="0">
+            </label>
+
+            <label>
+                Hours
+                <input
+                    type="number"
+                    class="bomb-hours"
+                    min="0"
+                    max="23"
+                    value="0">
+            </label>
+
+            <label>
+                Minutes
+                <input
+                    type="number"
+                    class="bomb-minutes"
+                    min="0"
+                    max="59"
+                    value="2">
+            </label>
+
+            <label>
+                Seconds
+                <input
+                    type="number"
+                    class="bomb-seconds"
+                    min="0"
+                    max="59"
+                    value="0">
+            </label>
+        </fieldset>
         <label>
             Strikes
             <input type="number" value="3">

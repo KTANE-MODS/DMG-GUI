@@ -25,22 +25,15 @@ export async function loadModules(): Promise<void> {
 }
 
 function createModuleDatalist(): void {
-    // todo add a safe guard in case something wrong happens with the json 
-
     const datalist = document.createElement("datalist");
     datalist.id = "module-list";
     for (const module of modules) {
-
         const option = document.createElement("option");
-
         option.value = module.Name;
-
         datalist.appendChild(option);
     }
-
     document.body.appendChild(datalist);
 }
-
 
 export function getModules(): readonly ModuleInfo[] {
     return modules;
