@@ -44,7 +44,7 @@ async function initialize() {
 
         errorElement!.hidden = true
 
-        // Loading succeeded - reveal the form.
+        // Loading succeeded, reveal the form.
         missionForm.hidden = false;
     }
     catch (e) {
@@ -53,7 +53,14 @@ async function initialize() {
 }
 
 generateButton.onclick = function() {
-  verifyFormInformation();
+    console.log('click')
+  const mission = verifyFormInformation();
+
+  if(mission == null) {
+    return;
+  }
+
+  console.log(mission)
 };
 
 initialize();

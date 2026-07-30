@@ -1,7 +1,8 @@
 export interface Bomb {
-    bombTime: Number;
+    time: Number;
     strikes: Number;
     frontOnly: boolean;
+    needyActivationTime: Number;
     widgets: Number;
     pools: Pool[];
 }
@@ -41,6 +42,7 @@ export interface Pool {
     presetType?: PresetType;
     profileName?: string;
     entries?: ModuleEntry[];
+    moduleName?: string;
 }
 
 export const modulesByName = new Map<string, ModuleInfo>();

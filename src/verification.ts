@@ -2,7 +2,7 @@
 // todo add import for dmg
 
 import { getModulesByName } from "./modules.js";
-import { Bomb } from "./types";
+import { Bomb, FactoryMode, Mission, ModuleEntry, Pool, PoolType } from "./types";
 
 const FIELD_INVALID_CLASS = "field-invalid";
 const FIELD_ERROR_CLASS = "field-error";
@@ -72,20 +72,27 @@ function markFieldsetInvalid(fieldset: HTMLFieldSetElement, message: string): vo
 }
 
 // Verification - shows every error at once, at the element it belongs to.
-// Returns true if the form is valid.
-export function verifyFormInformation(): boolean {
+// Returns a mission if the form is valid. Null otherwise
+export function verifyFormInformation(): Mission | null {
     clearAllFieldErrors();
+
+    let mission: Mission = {} as Mission;
 
     const modulesByName = getModulesByName();
     let errors: string[] = [];
     const inputs = document.querySelectorAll<HTMLInputElement>("#global-settings input");
 
+
     //verify mission name trimmed is not blank
     const missionName = inputs[0].value.trim();
 
-    if (missionName.length == 0) {
+
+   if (missionName.length == 0) {
         errors.push("Mission name is empty");
         markFieldInvalid(inputs[0], "Mission name is empty");
+    }
+    else {
+        mission.missionName = missionName;
     }
 
     //verify mission description trimmed is not blank
@@ -95,15 +102,27 @@ export function verifyFormInformation(): boolean {
         errors.push("Mission Description is empty");
         markFieldInvalid(inputs[1], "Mission Description is empty");
     }
+    else {
+        mission.missionDescription = missionName;
+    }
 
     const room = inputs[2].value.trim();
-    const frontOnly = inputs[3].checked;
+
+    if(room.length !== 0) {
+        mission.room = room;
+    }
+
+    mission.factoryMode = document.querySelector<HTMLSelectElement>("#global-settings .pool-type")!.value as FactoryMode;
+
+    mission.globalTime = inputs[3].checked
+    mission.globalStrikes = inputs[4].checked
 
     //for each bomb,
-    let bombs: Bomb[] = []
+    mission.bombs = [];
     let bombFieldSets = document.querySelectorAll<HTMLFieldSetElement>("#bomb-list fieldset.bomb")
 
     for (let bombFieldSet of bombFieldSets) {
+        let bomb: Bomb = {} as Bomb
         const bombInputs = bombFieldSet.querySelectorAll<HTMLInputElement>("input")
 
         // Bomb Time is max 6 days
@@ -120,9 +139,11 @@ export function verifyFormInformation(): boolean {
 
         if (totalBombTime / DAYS_TO_SECONDS > 6) {
             errors.push("Bomb time cannot go above 6 days")
-
             const bombTimeFieldset = bombFieldSet.querySelector<HTMLFieldSetElement>(".bomb-time")!;
             markFieldsetInvalid(bombTimeFieldset, "Bomb time cannot go above 6 days");
+        }
+        else {
+            bomb.time = totalBombTime
         }
 
         //strikes is at least 1
@@ -132,6 +153,9 @@ export function verifyFormInformation(): boolean {
             errors.push("Strikes cannot be below 1")
             markFieldInvalid(bombInputs[4], "Strikes cannot be below 1");
         }
+        else {
+            bomb.strikes = strikes;
+        }
 
         //Widgets is at least 0
         const widgets = parseInt(bombInputs[5].value);
@@ -139,6 +163,9 @@ export function verifyFormInformation(): boolean {
         if (widgets < 0) {
             errors.push("Widgets cannot be below 0")
             markFieldInvalid(bombInputs[5], "Widgets cannot be below 0");
+        }
+        else {
+            bomb.widgets = widgets;
         }
 
         //needy activation time is at least 0 
@@ -148,11 +175,17 @@ export function verifyFormInformation(): boolean {
             errors.push("Needy Activation Time cannot be below 0 seconds")
             markFieldInvalid(bombInputs[6], "Needy Activation Time cannot be below 0 seconds");
         }
+        else {
+            bomb.needyActivationTime = needy;
+        }
 
         const poolFieldSets = bombFieldSet.querySelectorAll<HTMLFieldSetElement>(".pool-list fieldset.pool")
-
+        
+        bomb.pools = []
+        
         //for each Pool
         for (let poolFieldSet of poolFieldSets) {
+            let pool: Pool = {} as Pool
             const poolInputs = poolFieldSet.querySelectorAll<HTMLInputElement>("input")
 
             //verify occurrence is at least 1
@@ -162,8 +195,12 @@ export function verifyFormInformation(): boolean {
                 errors.push("Occurrences cannot be below 1")
                 markFieldInvalid(poolInputs[0], "Occurrences cannot be below 1");
             }
-
+            
+            pool.occurrence = occurrences;
+            
             const poolType = poolFieldSet.querySelector<HTMLSelectElement>(".pool-type")!.value
+
+            pool.poolType = poolType as PoolType;
 
             switch (poolType) {
                 //if type is "preset"
@@ -179,6 +216,11 @@ export function verifyFormInformation(): boolean {
                             errors.push("There must be profile attached")
                             markFieldInvalid(fileInput, "There must be profile attached");
                         }
+
+                        else {
+                            pool.profileName = fileList[0].name;
+                        }
+
                     }
                     break;
 
@@ -186,8 +228,9 @@ export function verifyFormInformation(): boolean {
                 case 'Pool':
                     //for each module entry
                     const modEntries = poolFieldSet.querySelectorAll<HTMLDivElement>('.module-entry')
-                    let percentages = [];
+                    let entries: ModuleEntry[] = []
                     for (let modEntry of modEntries) {
+                        let entry: ModuleEntry = {} as ModuleEntry
                         const modEntryInputs = modEntry.querySelectorAll<HTMLInputElement>("input")
                         //verify module name is one of the ones loaded from the json
                         const moduleName = modEntryInputs[1].value
@@ -195,6 +238,9 @@ export function verifyFormInformation(): boolean {
                         if (!modulesByName.has(moduleName)) {
                             errors.push(`"${moduleName}" is not a valid module name.`)
                             markFieldInvalid(modEntryInputs[1], `"${moduleName}" is not a valid module name.`);
+                        }
+                        else {
+                            entry.moduleName = moduleName;
                         }
 
                         //verify weight is an integer
@@ -210,8 +256,13 @@ export function verifyFormInformation(): boolean {
                             errors.push("Module weight should be between 1 and 50 inclusively")
                             markFieldInvalid(modEntryInputs[0], "Module weight should be between 1 and 50 inclusively");
                         }
-                        percentages.push(moduleWeight)
+                        else {
+                            entry.weight = moduleWeight;
+                            entries.push(entry)
+                        }
                     }
+
+                    pool.entries = entries;
                     break;
 
                 //if type is "Module Name"
@@ -222,10 +273,21 @@ export function verifyFormInformation(): boolean {
                         errors.push(`"${moduleName}" is not a valid module name.`)
                         markFieldInvalid(poolInputs[2], `"${moduleName}" is not a valid module name.`);
                     }
+                    else {
+                        pool.moduleName = moduleName
+                    }
                     break;
             }
+
+            bomb.pools.push(pool)
         }
+
+        mission.bombs.push(bomb)
     }
 
-    return errors.length === 0;
+    if(errors.length !== 0) {
+        return null
+    }
+
+    return mission
 }
