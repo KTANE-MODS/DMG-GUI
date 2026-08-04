@@ -71,6 +71,20 @@ function markFieldsetInvalid(fieldset: HTMLFieldSetElement, message: string): vo
         : message;
 }
 
+const elementIndex = {
+    MISSION_NAME: 0,
+    MISSION_DESCRIPTION: 1,
+    TIME_MODE: 2,
+    ROOM: 3,
+    FACTORY_MODE: 4,
+    GLOBAL_STRIKES: 5,
+    GLOBAL_TIME: 6,
+    BOMB_TIME_DAYS: 0,
+    BOMB_TIME_HOURS: 1,
+    BOMB_TIME_MIN: 2,
+    BOMB_TIME_SEC: 3,
+}
+
 // Verification - shows every error at once, at the element it belongs to.
 // Returns a mission if the form is valid. Null otherwise
 export function verifyFormInformation(): Mission | null {
@@ -84,29 +98,29 @@ export function verifyFormInformation(): Mission | null {
 
 
     //verify mission name trimmed is not blank
-    const missionName = inputs[0].value.trim();
+    const missionName = inputs[elementIndex.MISSION_NAME].value.trim();
 
 
    if (missionName.length == 0) {
         errors.push("Mission name is empty");
-        markFieldInvalid(inputs[0], "Mission name is empty");
+        markFieldInvalid(inputs[elementIndex.MISSION_NAME], "Mission name is empty");
     }
     else {
-        mission.missionName = missionName;
+        mission.name = missionName;
     }
 
     //verify mission description trimmed is not blank
-    const missionDescription = inputs[1].value.trim();
+    const missionDescription = inputs[elementIndex.MISSION_DESCRIPTION].value.trim();
 
     if (missionDescription.length == 0) {
         errors.push("Mission Description is empty");
-        markFieldInvalid(inputs[1], "Mission Description is empty");
+        markFieldInvalid(inputs[elementIndex.MISSION_DESCRIPTION], "Mission Description is empty");
     }
     else {
-        mission.missionDescription = missionName;
+        mission.description = missionName;
     }
 
-    const room = inputs[2].value.trim();
+    const room = inputs[elementIndex.ROOM].value.trim();
 
     if(room.length !== 0) {
         mission.room = room;
@@ -114,8 +128,8 @@ export function verifyFormInformation(): Mission | null {
 
     mission.factoryMode = document.querySelector<HTMLSelectElement>("#global-settings .pool-type")!.value as FactoryMode;
 
-    mission.globalTime = inputs[3].checked
-    mission.globalStrikes = inputs[4].checked
+    mission.globalTime = inputs[elementIndex.GLOBAL_TIME].checked
+    mission.globalStrikes = inputs[elementIndex.GLOBAL_STRIKES].checked
 
     //for each bomb,
     mission.bombs = [];
@@ -127,10 +141,10 @@ export function verifyFormInformation(): Mission | null {
 
         // Bomb Time is max 6 days
         const DAYS_TO_SECONDS = 86400;
-        const days = parseInt(bombInputs[0].value);
-        const hours = parseInt(bombInputs[1].value);
-        const minutes = parseInt(bombInputs[2].value);
-        const seconds = parseInt(bombInputs[3].value);
+        const days = parseInt(bombInputs[elementIndex.BOMB_TIME_DAYS].value);
+        const hours = parseInt(bombInputs[elementIndex.BOMB_TIME_HOURS].value);
+        const minutes = parseInt(bombInputs[elementIndex.BOMB_TIME_MIN].value);
+        const seconds = parseInt(bombInputs[elementIndex.BOMB_TIME_SEC].value);
 
         const totalBombTime = days * DAYS_TO_SECONDS +
             hours * 3600 +
@@ -143,7 +157,12 @@ export function verifyFormInformation(): Mission | null {
             markFieldsetInvalid(bombTimeFieldset, "Bomb time cannot go above 6 days");
         }
         else {
-            bomb.time = totalBombTime
+            bomb.time = {
+                days: days,
+                hours: hours,
+                minutes: minutes,
+                seconds: seconds
+            }
         }
 
         //strikes is at least 1

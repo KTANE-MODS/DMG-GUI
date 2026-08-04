@@ -1,5 +1,12 @@
+export interface BombTime {
+    days: Number,
+    hours: Number,
+    minutes: Number,
+    seconds: Number
+}
+
 export interface Bomb {
-    time: Number;
+    time: BombTime;
     strikes: Number;
     frontOnly: boolean;
     needyActivationTime: Number;
@@ -7,11 +14,11 @@ export interface Bomb {
     pools: Pool[];
 }
 
-export type FactoryMode = 'Static' | 'Infinite' | 'Sequence'
+export type FactoryMode = 'Static' | 'Infinite' | 'Finite'
 
 export interface Mission {
-    missionName: string;
-    missionDescription: string;
+    name: string;
+    description: string;
     room?: string;
     noPacing: boolean;   
     factoryMode: FactoryMode;
