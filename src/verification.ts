@@ -2,7 +2,7 @@
 // todo add import for dmg
 
 import { getModulesByName } from "./modules.js";
-import { Bomb, FactoryMode, Mission, ModuleEntry, Pool, PoolType } from "./types";
+import { Bomb, FactoryMode, Mission, ModuleEntry, Pool, PoolType, PresetType } from "./types";
 
 const FIELD_INVALID_CLASS = "field-invalid";
 const FIELD_ERROR_CLASS = "field-error";
@@ -71,18 +71,26 @@ function markFieldsetInvalid(fieldset: HTMLFieldSetElement, message: string): vo
         : message;
 }
 
-const elementIndex = {
-    MISSION_NAME: 0,
-    MISSION_DESCRIPTION: 1,
-    TIME_MODE: 2,
-    ROOM: 3,
-    FACTORY_MODE: 4,
-    GLOBAL_STRIKES: 5,
-    GLOBAL_TIME: 6,
-    BOMB_TIME_DAYS: 0,
-    BOMB_TIME_HOURS: 1,
-    BOMB_TIME_MIN: 2,
-    BOMB_TIME_SEC: 3,
+const elementSelectors = {
+    MISSION_NAME: ".mission-name",
+    MISSION_DESCRIPTION: ".mission-description",
+    ROOM: ".room",
+    FACTORY_MODE: "global-settings .pool-type",
+    GLOBAL_TIME: ".global-time",
+    GLOBAL_STRIKES: ".global-strikes",
+    DAYS: ".bomb-days",
+    HOURS: ".bomb-hours",
+    MINUTES: ".bomb-minutes",
+    SECONDS: ".bomb-seconds",
+    STRIKES: ".bomb-strikes",
+    WIDGETS: ".bomb-widgets",
+    NEEDY_TIME: ".bomb-needy-time",
+    POOL_OCCURRENCE: ".pool-occurrence",
+    POOL_TYPE: ".pool-type",
+    PRESET_TYPE: ".preset-type",
+    FILE_INPUT: `input[type="file"]'`,
+    POOL_MODULE_NAME: ".pool-module-name",
+    POOL_MODULE_WEIGHT: ".pool-module-weight"
 }
 
 // Verification - shows every error at once, at the element it belongs to.
@@ -94,42 +102,39 @@ export function verifyFormInformation(): Mission | null {
 
     const modulesByName = getModulesByName();
     let errors: string[] = [];
-    const inputs = document.querySelectorAll<HTMLInputElement>("#global-settings input");
 
+    const globalSettings = document.querySelector("#global-settings")!;
 
     //verify mission name trimmed is not blank
-    const missionName = inputs[elementIndex.MISSION_NAME].value.trim();
-
+    const missionName = getTextInputValue(globalSettings, elementSelectors.MISSION_NAME)
 
    if (missionName.length == 0) {
-        errors.push("Mission name is empty");
-        markFieldInvalid(inputs[elementIndex.MISSION_NAME], "Mission name is empty");
+        addError(errors , getTextInputElement(globalSettings, elementSelectors.MISSION_NAME), "Mission name is empty")
     }
     else {
         mission.name = missionName;
     }
 
     //verify mission description trimmed is not blank
-    const missionDescription = inputs[elementIndex.MISSION_DESCRIPTION].value.trim();
-
+    const missionDescription = getTextInputValue(globalSettings, elementSelectors.MISSION_DESCRIPTION);
+    
     if (missionDescription.length == 0) {
-        errors.push("Mission Description is empty");
-        markFieldInvalid(inputs[elementIndex.MISSION_DESCRIPTION], "Mission Description is empty");
+        addError(errors , getTextInputElement(globalSettings, elementSelectors.MISSION_DESCRIPTION), "Mission Description is empty")
     }
     else {
-        mission.description = missionName;
+        mission.description = missionDescription;
     }
 
-    const room = inputs[elementIndex.ROOM].value.trim();
+    const room = getTextInputValue(globalSettings, elementSelectors.ROOM);
 
     if(room.length !== 0) {
         mission.room = room;
     }
 
-    mission.factoryMode = document.querySelector<HTMLSelectElement>("#global-settings .pool-type")!.value as FactoryMode;
+    mission.factoryMode = getTextInputValue(document, elementSelectors.FACTORY_MODE) as FactoryMode;
 
-    mission.globalTime = inputs[elementIndex.GLOBAL_TIME].checked
-    mission.globalStrikes = inputs[elementIndex.GLOBAL_STRIKES].checked
+    mission.globalTime = getTextInputElement(document, elementSelectors.GLOBAL_TIME)!.checked
+    mission.globalStrikes = getTextInputElement(document, elementSelectors.GLOBAL_STRIKES)!.checked
 
     //for each bomb,
     mission.bombs = [];
@@ -137,24 +142,24 @@ export function verifyFormInformation(): Mission | null {
 
     for (let bombFieldSet of bombFieldSets) {
         let bomb: Bomb = {} as Bomb
-        const bombInputs = bombFieldSet.querySelectorAll<HTMLInputElement>("input")
 
         // Bomb Time is max 6 days
         const DAYS_TO_SECONDS = 86400;
-        const days = parseInt(bombInputs[elementIndex.BOMB_TIME_DAYS].value);
-        const hours = parseInt(bombInputs[elementIndex.BOMB_TIME_HOURS].value);
-        const minutes = parseInt(bombInputs[elementIndex.BOMB_TIME_MIN].value);
-        const seconds = parseInt(bombInputs[elementIndex.BOMB_TIME_SEC].value);
+        const days = getIntInputValue(bombFieldSet, elementSelectors.DAYS);
+        const hours = getIntInputValue(bombFieldSet, elementSelectors.HOURS);
+        const minutes = getIntInputValue(bombFieldSet, elementSelectors.MINUTES);
+        const seconds = getIntInputValue(bombFieldSet, elementSelectors.SECONDS);
 
         const totalBombTime = days * DAYS_TO_SECONDS +
             hours * 3600 +
             minutes * 60 +
             seconds;
 
+            
         if (totalBombTime / DAYS_TO_SECONDS > 6) {
-            errors.push("Bomb time cannot go above 6 days")
             const bombTimeFieldset = bombFieldSet.querySelector<HTMLFieldSetElement>(".bomb-time")!;
-            markFieldsetInvalid(bombTimeFieldset, "Bomb time cannot go above 6 days");
+            addError(errors , bombTimeFieldset, "Bomb time cannot go above 6 days")
+
         }
         else {
             bomb.time = {
@@ -166,33 +171,33 @@ export function verifyFormInformation(): Mission | null {
         }
 
         //strikes is at least 1
-        const strikes = parseInt(bombInputs[4].value);
+        const strikes = getIntInputValue(bombFieldSet, elementSelectors.STRIKES);
+
+        
 
         if (strikes < 1) {
-            errors.push("Strikes cannot be below 1")
-            markFieldInvalid(bombInputs[4], "Strikes cannot be below 1");
+            addError(errors, getTextInputElement(bombFieldSet, elementSelectors.STRIKES), "Strikes cannot be below 1")
+
         }
         else {
             bomb.strikes = strikes;
         }
 
         //Widgets is at least 0
-        const widgets = parseInt(bombInputs[5].value);
+        const widgets = getIntInputValue(bombFieldSet, elementSelectors.WIDGETS);
 
         if (widgets < 0) {
-            errors.push("Widgets cannot be below 0")
-            markFieldInvalid(bombInputs[5], "Widgets cannot be below 0");
+            addError(errors, getTextInputElement(bombFieldSet, elementSelectors.WIDGETS), "Widgets cannot be below 0")
         }
         else {
             bomb.widgets = widgets;
         }
 
         //needy activation time is at least 0 
-        const needy = parseInt(bombInputs[6].value);
+        const needy = getIntInputValue(bombFieldSet, elementSelectors.NEEDY_TIME);
 
         if (needy < 0) {
-            errors.push("Needy Activation Time cannot be below 0 seconds")
-            markFieldInvalid(bombInputs[6], "Needy Activation Time cannot be below 0 seconds");
+            addError(errors, getTextInputElement(bombFieldSet, elementSelectors.NEEDY_TIME), "Needy Activation Time cannot be below 0 seconds")
         }
         else {
             bomb.needyActivationTime = needy;
@@ -205,19 +210,17 @@ export function verifyFormInformation(): Mission | null {
         //for each Pool
         for (let poolFieldSet of poolFieldSets) {
             let pool: Pool = {} as Pool
-            const poolInputs = poolFieldSet.querySelectorAll<HTMLInputElement>("input")
 
             //verify occurrence is at least 1
-            const occurrences = parseInt(poolInputs[0].value);
+            const occurrences = getIntInputValue(poolFieldSet, elementSelectors.POOL_OCCURRENCE)
 
             if (occurrences < 1) {
-                errors.push("Occurrences cannot be below 1")
-                markFieldInvalid(poolInputs[0], "Occurrences cannot be below 1");
+                addError(errors, getTextInputElement(bombFieldSet, elementSelectors.POOL_OCCURRENCE), "Occurrences cannot be below 1")
             }
             
             pool.occurrence = occurrences;
             
-            const poolType = poolFieldSet.querySelector<HTMLSelectElement>(".pool-type")!.value
+            const poolType = getTextInputValue(poolFieldSet, elementSelectors.POOL_TYPE)
 
             pool.poolType = poolType as PoolType;
 
@@ -225,22 +228,22 @@ export function verifyFormInformation(): Mission | null {
                 //if type is "preset"
                 case 'Preset':
                     //preset is "profile" or "needy profile", verify json input is not empty
-                    const presetType = poolFieldSet.querySelector<HTMLSelectElement>(".preset-type")!.value
-
+                    const presetType = poolFieldSet.querySelector<HTMLSelectElement>(elementSelectors.PRESET_TYPE)!.value
+                    
                     if (["Profile", "Needy Profile"].includes(presetType)) {
-                        const fileInput = poolFieldSet.querySelector<HTMLInputElement>('input[type="file"]')!;
+                        const fileInput = poolFieldSet.querySelector<HTMLInputElement>(elementSelectors.FILE_INPUT)!;
                         const fileList = (fileInput.files as FileList)
 
                         if (fileList.length < 1) {
-                            errors.push("There must be profile attached")
-                            markFieldInvalid(fileInput, "There must be profile attached");
+                            addError(errors, fileInput, "There must be profile attached")
                         }
 
                         else {
                             pool.profileName = fileList[0].name;
                         }
-
                     }
+
+                    pool.presetType = presetType as PresetType
                     break;
 
                 //if type is "pool"
@@ -250,13 +253,11 @@ export function verifyFormInformation(): Mission | null {
                     let entries: ModuleEntry[] = []
                     for (let modEntry of modEntries) {
                         let entry: ModuleEntry = {} as ModuleEntry
-                        const modEntryInputs = modEntry.querySelectorAll<HTMLInputElement>("input")
                         //verify module name is one of the ones loaded from the json
-                        const moduleName = modEntryInputs[1].value
+                        const moduleName = getTextInputValue(modEntry, elementSelectors.POOL_MODULE_NAME)
 
                         if (!modulesByName.has(moduleName)) {
-                            errors.push(`"${moduleName}" is not a valid module name.`)
-                            markFieldInvalid(modEntryInputs[1], `"${moduleName}" is not a valid module name.`);
+                            addError(errors, getTextInputElement(modEntry, elementSelectors.POOL_MODULE_NAME), `"${moduleName}" is not a valid module name.`)
                         }
                         else {
                             entry.moduleName = moduleName;
@@ -309,4 +310,21 @@ export function verifyFormInformation(): Mission | null {
     }
 
     return mission
+}
+
+function addError(errorArr: string[], element: Element | null, error: string) {
+    errorArr.push(error);
+    markFieldInvalid(element, error);
+}
+
+function getTextInputElement(baseElement: Element | Document, selector: string) {
+    return baseElement.querySelector<HTMLInputElement>(selector);
+}
+
+function getTextInputValue(baseElement: Element | Document, selector: string) {
+    return getTextInputElement(baseElement, selector)!.value.trim();
+}
+
+function getIntInputValue(baseElement: Element | Document, selector: string): number {
+    return parseInt(getTextInputValue(baseElement, selector))
 }
