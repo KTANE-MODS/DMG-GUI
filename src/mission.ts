@@ -52,7 +52,8 @@ export function generateDMGText(mission: Mission) {
 
         //todo pools
         for(let pool of bomb.pools) {
-            let poolStr = `${pool.occurrence}*`
+
+            let poolStr = `${pool.distinct ? "!" : ""}${pool.occurrence}*`
 
             switch(pool.poolType) {
                 case "Preset":
@@ -82,6 +83,9 @@ export function generateDMGText(mission: Mission) {
                 break;
             }
             bombStr += `${poolStr}\n`
-        }
+        }   
+        missionStr += `${bombStr})`     
     }
+
+    console.log(missionStr)
 }

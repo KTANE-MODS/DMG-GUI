@@ -72,26 +72,35 @@ function markFieldsetInvalid(fieldset: HTMLFieldSetElement, message: string): vo
 }
 
 const elementSelectors = {
-    MISSION_NAME: ".mission-name",
-    MISSION_DESCRIPTION: ".mission-description",
-    ROOM: ".room",
-    FACTORY_MODE: "global-settings .pool-type",
-    GLOBAL_TIME: ".global-time",
-    GLOBAL_STRIKES: ".global-strikes",
-    DAYS: ".bomb-days",
-    HOURS: ".bomb-hours",
-    MINUTES: ".bomb-minutes",
-    SECONDS: ".bomb-seconds",
-    STRIKES: ".bomb-strikes",
-    WIDGETS: ".bomb-widgets",
-    NEEDY_TIME: ".bomb-needy-time",
-    POOL_OCCURRENCE: ".pool-occurrence",
-    POOL_TYPE: ".pool-type",
-    PRESET_TYPE: ".preset-type",
-    FILE_INPUT: `input[type="file"]'`,
-    POOL_MODULE_NAME: ".pool-module-name",
-    POOL_MODULE_WEIGHT: ".pool-module-weight"
-}
+    global: {
+        missionName: ".mission-name",
+        missionDescription: ".mission-description",
+        room: ".room",
+        globalTime: ".global-time",
+        globalStrikes: ".global-strikes",
+        factoryMode: ".factory-mode",
+    },
+
+    bomb: {
+        days: ".bomb-days",
+        hours: ".bomb-hours",
+        minutes: ".bomb-minutes",
+        seconds: ".bomb-seconds",
+        strikes: ".bomb-strikes",
+        widgets: ".bomb-widgets",
+        needyTime: ".bomb-needy-time",
+    },
+
+    pool: {
+        occurrence: ".pool-occurrence",
+        distinct: ".distinct",
+        type: ".pool-type",
+        presetType: ".preset-type",
+        fileInput: '.profile-upload',
+        moduleWeight: ".pool-module-weight",
+        moduleName: ".module-name"
+    },
+};
 
 // Verification - shows every error at once, at the element it belongs to.
 // Returns a mission if the form is valid. Null otherwise
@@ -106,35 +115,38 @@ export function verifyFormInformation(): Mission | null {
     const globalSettings = document.querySelector("#global-settings")!;
 
     //verify mission name trimmed is not blank
-    const missionName = getTextInputValue(globalSettings, elementSelectors.MISSION_NAME)
+    const missionName = getTextInputValue(globalSettings, elementSelectors.global.missionName)
 
    if (missionName.length == 0) {
-        addError(errors , getTextInputElement(globalSettings, elementSelectors.MISSION_NAME), "Mission name is empty")
+        addError(errors , findTextInputElement(globalSettings, elementSelectors.global.missionName), "Mission name is empty")
     }
     else {
         mission.name = missionName;
     }
 
     //verify mission description trimmed is not blank
-    const missionDescription = getTextInputValue(globalSettings, elementSelectors.MISSION_DESCRIPTION);
+    const missionDescription = getTextAreaValue(globalSettings, elementSelectors.global.missionDescription);
+
+
+
     
     if (missionDescription.length == 0) {
-        addError(errors , getTextInputElement(globalSettings, elementSelectors.MISSION_DESCRIPTION), "Mission Description is empty")
+        addError(errors , findTextAreaElement(globalSettings, elementSelectors.global.missionDescription), "Mission Description is empty")
     }
     else {
         mission.description = missionDescription;
     }
 
-    const room = getTextInputValue(globalSettings, elementSelectors.ROOM);
+    const room = getTextInputValue(globalSettings, elementSelectors.global.room);
 
     if(room.length !== 0) {
         mission.room = room;
     }
 
-    mission.factoryMode = getTextInputValue(document, elementSelectors.FACTORY_MODE) as FactoryMode;
+    mission.factoryMode = getTextInputValue(document, elementSelectors.global.factoryMode) as FactoryMode;
 
-    mission.globalTime = getTextInputElement(document, elementSelectors.GLOBAL_TIME)!.checked
-    mission.globalStrikes = getTextInputElement(document, elementSelectors.GLOBAL_STRIKES)!.checked
+    mission.globalTime = findTextInputElement(document, elementSelectors.global.globalTime)!.checked
+    mission.globalStrikes = findTextInputElement(document, elementSelectors.global.globalStrikes)!.checked
 
     //for each bomb,
     mission.bombs = [];
@@ -145,10 +157,10 @@ export function verifyFormInformation(): Mission | null {
 
         // Bomb Time is max 6 days
         const DAYS_TO_SECONDS = 86400;
-        const days = getIntInputValue(bombFieldSet, elementSelectors.DAYS);
-        const hours = getIntInputValue(bombFieldSet, elementSelectors.HOURS);
-        const minutes = getIntInputValue(bombFieldSet, elementSelectors.MINUTES);
-        const seconds = getIntInputValue(bombFieldSet, elementSelectors.SECONDS);
+        const days = getIntegerInputValue(bombFieldSet, elementSelectors.bomb.days);
+        const hours = getIntegerInputValue(bombFieldSet, elementSelectors.bomb.hours);
+        const minutes = getIntegerInputValue(bombFieldSet, elementSelectors.bomb.minutes);
+        const seconds = getIntegerInputValue(bombFieldSet, elementSelectors.bomb.seconds);
 
         const totalBombTime = days * DAYS_TO_SECONDS +
             hours * 3600 +
@@ -171,33 +183,30 @@ export function verifyFormInformation(): Mission | null {
         }
 
         //strikes is at least 1
-        const strikes = getIntInputValue(bombFieldSet, elementSelectors.STRIKES);
-
-        
+        const strikes = getIntegerInputValue(bombFieldSet, elementSelectors.bomb.strikes);
 
         if (strikes < 1) {
-            addError(errors, getTextInputElement(bombFieldSet, elementSelectors.STRIKES), "Strikes cannot be below 1")
-
+            addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.strikes), "Strikes cannot be below 1")
         }
         else {
             bomb.strikes = strikes;
         }
 
         //Widgets is at least 0
-        const widgets = getIntInputValue(bombFieldSet, elementSelectors.WIDGETS);
+        const widgets = getIntegerInputValue(bombFieldSet, elementSelectors.bomb.widgets);
 
         if (widgets < 0) {
-            addError(errors, getTextInputElement(bombFieldSet, elementSelectors.WIDGETS), "Widgets cannot be below 0")
+            addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.widgets), "Widgets cannot be below 0")
         }
         else {
             bomb.widgets = widgets;
         }
 
         //needy activation time is at least 0 
-        const needy = getIntInputValue(bombFieldSet, elementSelectors.NEEDY_TIME);
+        const needy = getIntegerInputValue(bombFieldSet, elementSelectors.bomb.needyTime);
 
         if (needy < 0) {
-            addError(errors, getTextInputElement(bombFieldSet, elementSelectors.NEEDY_TIME), "Needy Activation Time cannot be below 0 seconds")
+            addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.needyTime), "Needy Activation Time cannot be below 0 seconds")
         }
         else {
             bomb.needyActivationTime = needy;
@@ -212,15 +221,15 @@ export function verifyFormInformation(): Mission | null {
             let pool: Pool = {} as Pool
 
             //verify occurrence is at least 1
-            const occurrences = getIntInputValue(poolFieldSet, elementSelectors.POOL_OCCURRENCE)
+            const occurrences = getIntegerInputValue(poolFieldSet, elementSelectors.pool.occurrence)
 
             if (occurrences < 1) {
-                addError(errors, getTextInputElement(bombFieldSet, elementSelectors.POOL_OCCURRENCE), "Occurrences cannot be below 1")
+                addError(errors, findTextInputElement(poolFieldSet, elementSelectors.pool.occurrence), "Occurrences cannot be below 1")
             }
             
             pool.occurrence = occurrences;
             
-            const poolType = getTextInputValue(poolFieldSet, elementSelectors.POOL_TYPE)
+            const poolType = getTextInputValue(poolFieldSet, elementSelectors.pool.type)
 
             pool.poolType = poolType as PoolType;
 
@@ -228,10 +237,12 @@ export function verifyFormInformation(): Mission | null {
                 //if type is "preset"
                 case 'Preset':
                     //preset is "profile" or "needy profile", verify json input is not empty
-                    const presetType = poolFieldSet.querySelector<HTMLSelectElement>(elementSelectors.PRESET_TYPE)!.value
-                    
+
+                    const presetType = getSelectValue(poolFieldSet, elementSelectors.pool.presetType);
+
                     if (["Profile", "Needy Profile"].includes(presetType)) {
-                        const fileInput = poolFieldSet.querySelector<HTMLInputElement>(elementSelectors.FILE_INPUT)!;
+
+                        const fileInput = findTextInputElement(poolFieldSet, elementSelectors.pool.fileInput)!;
                         const fileList = (fileInput.files as FileList)
 
                         if (fileList.length < 1) {
@@ -254,29 +265,32 @@ export function verifyFormInformation(): Mission | null {
                     for (let modEntry of modEntries) {
                         let entry: ModuleEntry = {} as ModuleEntry
                         //verify module name is one of the ones loaded from the json
-                        const moduleName = getTextInputValue(modEntry, elementSelectors.POOL_MODULE_NAME)
+                        const moduleName = getTextInputValue(modEntry, elementSelectors.pool.moduleName)
 
                         if (!modulesByName.has(moduleName)) {
-                            addError(errors, getTextInputElement(modEntry, elementSelectors.POOL_MODULE_NAME), `"${moduleName}" is not a valid module name.`)
+                            addError(errors, findTextInputElement(modEntry, elementSelectors.pool.moduleName), `"${moduleName}" is not a valid module name.`)
                         }
                         else {
                             entry.moduleName = moduleName;
                         }
 
                         //verify weight is an integer
-                        const moduleWeight = parseInt(modEntryInputs[0].value)
+                        let weightValid = true;
+                        const moduleWeight = getIntegerInputValue(modEntry, elementSelectors.pool.moduleName)
 
-                        if (moduleWeight != Number(modEntryInputs[0].value)) {
-                            errors.push(`Weight must be an integer.`)
-                            markFieldInvalid(modEntryInputs[0], "Weight must be an integer.");
+                        if (moduleWeight != Number(findTextInputElement(modEntry, elementSelectors.pool.moduleWeight))) {
+                            addError(errors, findTextInputElement(modEntry, elementSelectors.pool.moduleWeight), "Weight must be an integer.")
+                            weightValid = false;
                         }
 
                         //verify the weight is between 1 - 50. 
                         if (moduleWeight < 1 || moduleWeight > 50) {
                             errors.push("Module weight should be between 1 and 50 inclusively")
-                            markFieldInvalid(modEntryInputs[0], "Module weight should be between 1 and 50 inclusively");
+                            markFieldInvalid(findTextInputElement(modEntry, elementSelectors.pool.moduleWeight), "Module weight should be between 1 and 50 inclusively");
+                            weightValid = false;
                         }
-                        else {
+
+                        if(weightValid) {
                             entry.weight = moduleWeight;
                             entries.push(entry)
                         }
@@ -288,16 +302,18 @@ export function verifyFormInformation(): Mission | null {
                 //if type is "Module Name"
                 case 'Module Name':
                     //verify module name is not empty
-                    const moduleName = poolInputs[2].value
+                    const moduleName = getSelectValue(poolFieldSet, elementSelectors.pool.moduleName)
+
                     if (!modulesByName.has(moduleName)) {
-                        errors.push(`"${moduleName}" is not a valid module name.`)
-                        markFieldInvalid(poolInputs[2], `"${moduleName}" is not a valid module name.`);
+                        addError(errors, findTextInputElement(poolFieldSet, elementSelectors.pool.moduleName), `"${moduleName}" is not a valid module name.`)
                     }
                     else {
                         pool.moduleName = moduleName
                     }
                     break;
             }
+
+            pool.distinct = findTextInputElement(poolFieldSet, elementSelectors.pool.distinct)!.checked;
 
             bomb.pools.push(pool)
         }
@@ -317,14 +333,97 @@ function addError(errorArr: string[], element: Element | null, error: string) {
     markFieldInvalid(element, error);
 }
 
-function getTextInputElement(baseElement: Element | Document, selector: string) {
-    return baseElement.querySelector<HTMLInputElement>(selector);
+function getFindElementError(container: Element | Document, selector: string) : Error {
+    return new Error(`Could not find input matching selector: ${selector} on the container ${container}`);
 }
 
-function getTextInputValue(baseElement: Element | Document, selector: string) {
-    return getTextInputElement(baseElement, selector)!.value.trim();
+/**
+ * Finds a text area within the specified container.
+ *
+ * @param container - The element or document to search within.
+ * @param selector - CSS selector used to locate the input.
+ * @returns The matching input element, or null if no matching element is found.
+ */
+function findTextAreaElement(container: Element | Document, selector: string): HTMLTextAreaElement | null {
+    return container.querySelector<HTMLTextAreaElement>(selector);
 }
 
-function getIntInputValue(baseElement: Element | Document, selector: string): number {
-    return parseInt(getTextInputValue(baseElement, selector))
+/**
+ * Gets the trimmed value of a text area within the specified container.
+ *
+ * @param container - The element or document to search within.
+ * @param selector - CSS selector used to locate the input.
+ * @returns The trimmed value of the matching input.
+ * @throws Error if no matching input element is found.
+ */
+function getTextAreaValue(container: Element | Document, selector: string): string {
+    const input = findTextAreaElement(container, selector);
+    if (!input) {
+        throw getFindElementError(container, selector)
+    }
+    return input.value.trim();
 }
+
+/**
+ * Finds a text input within the specified container.
+ *
+ * @param container - The element or document to search within.
+ * @param selector - CSS selector used to locate the input.
+ * @returns The matching input element, or null if no matching element is found.
+ */
+function findTextInputElement(container: Element | Document, selector: string): HTMLInputElement | null {
+    return container.querySelector<HTMLInputElement>(selector);
+}
+
+/**
+ * Gets the trimmed value of a text input within the specified container.
+ *
+ * @param container - The element or document to search within.
+ * @param selector - CSS selector used to locate the input.
+ * @returns The trimmed value of the matching input.
+ * @throws Error if no matching input element is found.
+ */
+function getTextInputValue(container: Element | Document, selector: string): string {
+    const input = findTextInputElement(container, selector);
+    if (!input) {
+        throw getFindElementError(container, selector)
+    }
+    return input.value.trim();
+}
+
+/**
+ * Gets the value of a text input as an integer.
+ *
+ * @param container - The element or document to search within.
+ * @param selector - CSS selector used to locate the input.
+ * @returns The parsed integer value of the matching input.
+ * @throws Error if no matching input element is found.
+ */
+function getIntegerInputValue(container: Element | Document, selector: string): number {
+    return parseInt(getTextInputValue(container, selector));
+}
+
+/**
+ * Finds a selector within the specified container.
+ * @param container - The element or document to search within.
+ * @param selector - CSS selector used to locate the input.
+ * @returns The matching input element, or null if no matching element is found.
+ */
+function getSelectorElement(container: Element | Document, selector: string): HTMLSelectElement | null {
+    return container.querySelector<HTMLSelectElement>(selector);
+}
+
+function getSelectValue(container: Element | Document,selector: string): string {
+    let element = getSelectorElement(container, selector);
+    if(!element) {
+        throw getFindElementError(container, selector)
+    }
+    return element.value;   
+}
+
+
+
+
+
+
+

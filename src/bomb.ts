@@ -54,12 +54,12 @@ export function createBombElement(): HTMLFieldSetElement {
         </fieldset>
         <label>
             Strikes
-            <input type="number" min="1" value="3">
+            <input type="number" min="1" value="3" class="bomb-strikes">
         </label>
 
         <label>
             Widgets
-            <input type="number" value="5">
+            <input type="number" value="5" class="bomb-widgets">
         </label>
 
         <label>
@@ -67,7 +67,9 @@ export function createBombElement(): HTMLFieldSetElement {
             <input 
                 type="number" 
                 min="0" 
-                value="90">
+                value="90"
+                class="bomb-needy-time"
+                >
         </label>
 
         <label>

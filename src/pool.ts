@@ -9,7 +9,10 @@ export function createPoolElement(): HTMLFieldSetElement {
 
         <label>
             Occurrence
-            <input type="number" value="1">
+            <input type="number"
+            class="pool-occurrence"
+            value="1">
+
         </label>
 
         <label>
@@ -22,7 +25,8 @@ export function createPoolElement(): HTMLFieldSetElement {
         </label>
 
         <label>
-            <input type="checkbox">
+            <input type="checkbox"
+            class="distinct">
             Distinct
         </label>
 
@@ -140,6 +144,7 @@ function renderModuleNameOptions(
         <label>
             Module Name
             <input type="text" list="module-list">
+            class="module-name"
         </label>
     `;
 }
@@ -196,7 +201,7 @@ function createModuleEntryElement(): HTMLDivElement {
 
         <label>
             Module Name
-            <input type="text" list="module-list">
+            <input type="text" list="module-list" class="module-name">
         </label>
 
         <button

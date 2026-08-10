@@ -199,7 +199,8 @@ label:has(input[type="checkbox"]) {
 
 input[type="text"],
 input[type="input"],
-input[type="number"] {
+input[type="number"],
+textarea.mission-description {
     padding: 9px 10px;
 
     background: var(--panel-inset);
@@ -211,9 +212,15 @@ input[type="number"] {
     font-size: 0.95rem;
 }
 
+textarea.mission-description {
+    height: 150px;
+    resize: vertical;
+}
+
 input[type="text"]:focus,
 input[type="input"]:focus,
 input[type="number"]:focus,
+textarea.mission-description:focus,
 select:focus {
     outline: 2px solid var(--amber);
     outline-offset: 1px;
