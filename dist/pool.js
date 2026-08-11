@@ -15,9 +15,10 @@ export function createPoolElement() {
         <label>
             Pool Type
             <select class="pool-type">
-                <option>Preset</option>
+                <option>Module Name</option>    
                 <option>Pool</option>
-                <option>Module Name</option>
+                <option>Preset</option>
+                
             </select>
         </label>
 
