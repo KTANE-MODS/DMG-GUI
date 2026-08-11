@@ -1,6 +1,7 @@
 import { loadModules } from "./modules.js";
 import { createBombElement } from "./bomb.js";
 import { verifyFormInformation } from "./verification.js"
+import { generateDMGText } from "./mission.js";
 
 const generateButton = document.querySelector<HTMLButtonElement>("#generate")!;
 
@@ -61,6 +62,8 @@ generateButton.onclick = function() {
   }
 
   console.log(mission)
+
+  generateDMGText(mission)
 };
 
 initialize();

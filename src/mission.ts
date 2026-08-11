@@ -1,15 +1,15 @@
-import { Mission, PresetType } from "./types";
-import { getModulesByName } from "./modules";
+import { Mission } from "./types";
+import { getModulesByName } from "./modules.js";
 
 export function generateDMGText(mission: Mission) {
     let modulesByName = getModulesByName();
     let missionStr = ""
 
     // todo mission name
-    missionStr += `//${mission.name}\n`
+    missionStr += `///${mission.name}\n`
 
     // todo mission description
-    missionStr += `//${mission.description}\n`
+    missionStr += `${mission.description.split("\n").map(line => `///${line.trim()}`).join("\n")}\n`;
 
     // todo room
     if(mission.room != undefined) {
@@ -34,7 +34,8 @@ export function generateDMGText(mission: Mission) {
 
         //todo time
         let time = bomb.time
-        bombStr += `[${time.days}]:[${time.hours}]:[${time.minutes}]:[${time.seconds}]\n`
+        time.hours = time.hours as number + (time.days as number * 24) as number;
+        bombStr += `${time.hours}:${time.minutes}:${time.seconds}\n`
 
         //todo strikes
         bombStr += `${bomb.strikes}X\n`
@@ -43,7 +44,7 @@ export function generateDMGText(mission: Mission) {
         bombStr += `widgets:${bomb.widgets}\n`
 
         //todo needy activation time
-        bombStr += `needyactivationtime:${bomb.needyActivationTime}`
+        bombStr += `needyactivationtime:${bomb.needyActivationTime}\n`
 
         //todo front only
         if(bomb.frontOnly) {
@@ -67,7 +68,7 @@ export function generateDMGText(mission: Mission) {
                     }
 
                     else {
-                        poolStr += `${preset.toUpperCase().replaceAll(" ", "_")}\n`
+                        poolStr += `${preset.toUpperCase().replaceAll(" ", "_")}`
                     }
                 break;
                 case "Pool":
@@ -76,16 +77,15 @@ export function generateDMGText(mission: Mission) {
                         arr.push(...Array(entry.weight).fill(modulesByName.get(entry.moduleName)!.ModuleID))
                     })
 
-                    poolStr += `${arr.join(",")}\n`
+                    poolStr += `${arr.join(",")}`
                 break;
                 case "Module Name":
-                    poolStr += `${modulesByName.get(pool.moduleName!)!.ModuleID}\n`
+                    poolStr += `${modulesByName.get(pool.moduleName!)!.ModuleID}`
                 break;
             }
             bombStr += `${poolStr}\n`
         }   
-        missionStr += `${bombStr})`     
+        missionStr += `${bombStr})\n`     
     }
-
     console.log(missionStr)
 }
