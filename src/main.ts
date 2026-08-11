@@ -53,7 +53,7 @@ async function initialize() {
     }
 }
 
-generateButton.onclick = function() {
+generateButton.onclick = async function() {
     console.log('click')
   const mission = verifyFormInformation();
 
@@ -63,7 +63,7 @@ generateButton.onclick = function() {
 
   console.log(mission)
 
-  generateDMGText(mission)
+  await generateDMGText(mission)
 };
 
 initialize();

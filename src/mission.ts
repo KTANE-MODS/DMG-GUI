@@ -1,7 +1,8 @@
 import { Mission } from "./types";
 import { getModulesByName } from "./modules.js";
+import { saveTextFile } from "./io.js";
 
-export function generateDMGText(mission: Mission) {
+export async function generateDMGText(mission: Mission) {
     let modulesByName = getModulesByName();
     let missionStr = ""
 
@@ -88,4 +89,6 @@ export function generateDMGText(mission: Mission) {
         missionStr += `${bombStr})\n`     
     }
     console.log(missionStr)
+
+    await(saveTextFile(mission.name, missionStr))
 }
