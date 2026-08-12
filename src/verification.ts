@@ -82,23 +82,29 @@ const elementSelectors = {
     },
 
     defaultBomb: {
-         days: ".default-bomb-days",
+        days: ".default-bomb-days",
         hours: ".default-bomb-hours",
-      minutes: ".default-bomb-minutes",
-      seconds: ".default-bomb-seconds",
-      strikes: ".default-bomb-strikes",
-      widgets: ".default-bomb-widgets",
-    needyTime: ".default-bomb-needy-time",
+        minutes: ".default-bomb-minutes",
+        seconds: ".default-bomb-seconds",
+        strikes: ".default-bomb-strikes",
+        widgets: ".default-bomb-widgets",
+        needyTime: ".default-bomb-needy-time",
 
     },
 
     bomb: {
+        useDefaultTime: ".use-default-time",
+        useDefaultStrikes: ".use-default-strikes",
+        useDefaultWidgets: ".use-default-widgets",
+        useDefaultNeedyTime: ".use-default-needy-time",
+        useDefaultFrontOnly: ".use-default-front-only",
         days: ".bomb-days",
         hours: ".bomb-hours",
         minutes: ".bomb-minutes",
         seconds: ".bomb-seconds",
         strikes: ".bomb-strikes",
         widgets: ".bomb-widgets",
+        frontOnly: ".bomb-front-only",
         needyTime: ".bomb-needy-time",
     },
 
@@ -128,8 +134,8 @@ export function verifyFormInformation(): Mission | null {
     //verify mission name trimmed is not blank
     const missionName = getTextInputValue(globalSettings, elementSelectors.global.missionName)
 
-   if (missionName.length == 0) {
-        addError(errors , findTextInputElement(globalSettings, elementSelectors.global.missionName), "Mission name is empty")
+    if (missionName.length == 0) {
+        addError(errors, findTextInputElement(globalSettings, elementSelectors.global.missionName), "Mission name is empty")
     }
     else {
         mission.name = missionName;
@@ -137,9 +143,9 @@ export function verifyFormInformation(): Mission | null {
 
     //verify mission description trimmed is not blank
     const missionDescription = getTextAreaValue(globalSettings, elementSelectors.global.missionDescription);
-    
+
     if (missionDescription.length == 0) {
-        addError(errors , findTextAreaElement(globalSettings, elementSelectors.global.missionDescription), "Mission Description is empty")
+        addError(errors, findTextAreaElement(globalSettings, elementSelectors.global.missionDescription), "Mission Description is empty")
     }
     else {
         mission.description = missionDescription;
@@ -147,7 +153,7 @@ export function verifyFormInformation(): Mission | null {
 
     const room = getTextInputValue(globalSettings, elementSelectors.global.room);
 
-    if(room.length !== 0) {
+    if (room.length !== 0) {
         mission.room = room;
     }
 
@@ -163,13 +169,13 @@ export function verifyFormInformation(): Mission | null {
     let defaultTimeFieldSet = document.querySelector<HTMLFieldSetElement>(".default-bomb-time")!
     let defaultBombFieldSet = document.querySelector<HTMLFieldSetElement>("#default-bomb")!
 
-    let defaultTime = validBombTime(defaultTimeFieldSet, 
+    let defaultTime = validBombTime(defaultTimeFieldSet,
         elementSelectors.defaultBomb.days,
         elementSelectors.defaultBomb.hours,
         elementSelectors.defaultBomb.minutes,
         elementSelectors.defaultBomb.seconds)
 
-    if(typeof defaultTime === "string") {
+    if (typeof defaultTime === "string") {
         addError(errors, defaultTimeFieldSet, defaultTime)
     }
 
@@ -179,26 +185,22 @@ export function verifyFormInformation(): Mission | null {
 
     //strikes
     const defaultStrikes = validStrikes(defaultBombFieldSet, elementSelectors.defaultBomb.strikes)
-
-    if(typeof(defaultStrikes) === "string") {
+    if (typeof (defaultStrikes) === "string") {
         addError(errors, findTextInputElement(defaultBombFieldSet, elementSelectors.defaultBomb.strikes), defaultStrikes);
     }
 
     //widgets
     const defaultWidgets = validWidgets(defaultBombFieldSet, elementSelectors.defaultBomb.widgets)
-
-    if(typeof(defaultWidgets) === "string") {
+    if (typeof (defaultWidgets) === "string") {
         addError(errors, findTextInputElement(defaultBombFieldSet, elementSelectors.defaultBomb.widgets), defaultWidgets);
     }
 
     //needy time
     const defaultNeedyTime = validNeedyTime(defaultBombFieldSet, elementSelectors.defaultBomb.needyTime)
-
-    if(typeof(defaultNeedyTime) === "string") {
+    if (typeof (defaultNeedyTime) === "string") {
         addError(errors, findTextInputElement(defaultBombFieldSet, elementSelectors.defaultBomb.needyTime), defaultNeedyTime);
     }
 
-    
     mission.defaultBomb = defaultBomb
 
     //for each bomb,
@@ -208,56 +210,81 @@ export function verifyFormInformation(): Mission | null {
     for (let bombFieldSet of bombFieldSets) {
         let bomb: Bomb = {} as Bomb
 
-        let timeFieldSet = bombFieldSet.querySelector<HTMLFieldSetElement>(".bomb-time")!
+        // time
+        let useDefaultTime = bombFieldSet.querySelector<HTMLInputElement>(elementSelectors.bomb.useDefaultTime)!.checked;
+        bomb.useDefaultTime = useDefaultTime
 
-        let time = validBombTime(timeFieldSet,
-        elementSelectors.bomb.days,
-        elementSelectors.bomb.hours,
-        elementSelectors.bomb.minutes,
-        elementSelectors.bomb.seconds)
-        
+        if (!useDefaultTime) {
+            let timeFieldSet = bombFieldSet.querySelector<HTMLFieldSetElement>(".bomb-time")!
 
-        if(typeof time === "string") {
-            addError(errors, timeFieldSet, time)
-        }
+            let time = validBombTime(timeFieldSet,
+                elementSelectors.bomb.days,
+                elementSelectors.bomb.hours,
+                elementSelectors.bomb.minutes,
+                elementSelectors.bomb.seconds)
 
-        else {
-            bomb.time = time;
+            if (typeof time === "string") {
+                addError(errors, timeFieldSet, time)
+            }
+
+            else {
+                bomb.time = time;
+            }
         }
 
         //strikes
-        const strikes = validStrikes(bombFieldSet, elementSelectors.bomb.strikes)
+        let useDefaultStrikes = bombFieldSet.querySelector<HTMLInputElement>(elementSelectors.bomb.useDefaultStrikes)!.checked;
+        bomb.useDefaultStrikes = useDefaultStrikes
 
-        if(typeof(strikes) === "string") {
-            addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.strikes), strikes);
-        }
-        else {
-            bomb.strikes = strikes;
+        if (!useDefaultStrikes) {
+            const strikes = validStrikes(bombFieldSet, elementSelectors.bomb.strikes)
+
+            if (typeof (strikes) === "string") {
+                addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.strikes), strikes);
+            }
+            else {
+                bomb.strikes = strikes;
+            }
         }
 
         //Widgets is at least 0
-        const widgets = validWidgets(bombFieldSet, elementSelectors.bomb.widgets)
-        if(typeof(widgets) === "string") {
-            addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.widgets), widgets);
-        }
-        else {
-            bomb.widgets = widgets;
+        let useDefaultWidgets = bombFieldSet.querySelector<HTMLInputElement>(elementSelectors.bomb.useDefaultWidgets)!.checked;
+        bomb.useDefaultWidgets = useDefaultWidgets
+        if (!useDefaultWidgets) {
+            const widgets = validWidgets(bombFieldSet, elementSelectors.bomb.widgets)
+            if (typeof (widgets) === "string") {
+                addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.widgets), widgets);
+            }
+            else {
+                bomb.widgets = widgets;
+            }
         }
 
         //needy activation time is at least 0 
-        const needyTime = validNeedyTime(bombFieldSet, elementSelectors.bomb.needyTime)
+        let useDefaultNeedyActivationTime = bombFieldSet.querySelector<HTMLInputElement>(elementSelectors.bomb.useDefaultNeedyTime)!.checked;
+        bomb.useDefaultNeedyActivationTime = useDefaultNeedyActivationTime;
+        if (!useDefaultNeedyActivationTime) {
+            const needyTime = validNeedyTime(bombFieldSet, elementSelectors.bomb.needyTime)
 
-        if(typeof(needyTime) === "string") {
-            addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.needyTime), needyTime);
+            if (typeof (needyTime) === "string") {
+                addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.needyTime), needyTime);
+            }
+            else {
+                bomb.needyActivationTime = needyTime;
+            }
         }
-        else {
-            bomb.needyActivationTime = needyTime;
+
+        //front only
+        let useDefaultFrontOnly = bombFieldSet.querySelector<HTMLInputElement>(elementSelectors.bomb.useDefaultFrontOnly)!.checked;
+        bomb.useDefaultFrontOnly = useDefaultFrontOnly;
+        if (!useDefaultFrontOnly) {
+            bomb.frontOnly = bombFieldSet.querySelector<HTMLInputElement>(elementSelectors.bomb.frontOnly)!.checked
         }
 
         const poolFieldSets = bombFieldSet.querySelectorAll<HTMLFieldSetElement>(".pool-list fieldset.pool")
-        
+
         bomb.pools = []
-        
+
         //for each Pool
         for (let poolFieldSet of poolFieldSets) {
             let pool: Pool = {} as Pool
@@ -268,9 +295,9 @@ export function verifyFormInformation(): Mission | null {
             if (occurrences < 1) {
                 addError(errors, findTextInputElement(poolFieldSet, elementSelectors.pool.occurrence), "Occurrences cannot be below 1")
             }
-            
+
             pool.occurrence = occurrences;
-            
+
             const poolType = getTextInputValue(poolFieldSet, elementSelectors.pool.type)
 
             pool.poolType = poolType as PoolType;
@@ -332,7 +359,7 @@ export function verifyFormInformation(): Mission | null {
                             weightValid = false;
                         }
 
-                        if(weightValid) {
+                        if (weightValid) {
                             entry.weight = moduleWeight;
                             entries.push(entry)
                         }
@@ -363,7 +390,7 @@ export function verifyFormInformation(): Mission | null {
         mission.bombs.push(bomb)
     }
 
-    if(errors.length !== 0) {
+    if (errors.length !== 0) {
         return null
     }
 
@@ -371,7 +398,7 @@ export function verifyFormInformation(): Mission | null {
 }
 
 // If there is an error, return a string, otherwise return the bomb time
-function validBombTime(fieldset: HTMLFieldSetElement, daySelector: string, hourSelector: string, minuteSelector: string, secondSelector: string) : string | BombTime {
+function validBombTime(fieldset: HTMLFieldSetElement, daySelector: string, hourSelector: string, minuteSelector: string, secondSelector: string): string | BombTime {
     // Bomb Time is max 6 days
     const DAYS_TO_SECONDS = 86400;
     const days = getIntegerInputValue(fieldset, daySelector);
@@ -384,31 +411,31 @@ function validBombTime(fieldset: HTMLFieldSetElement, daySelector: string, hourS
         minutes * 60 +
         seconds;
 
-    return totalBombTime / DAYS_TO_SECONDS > 6 ? 
-            "Bomb time cannot go above 6 days" : 
-            {
-                days: days,
-                hours: hours,
-                minutes: minutes,
-                seconds: seconds
-            }
+    return totalBombTime / DAYS_TO_SECONDS > 6 ?
+        "Bomb time cannot go above 6 days" :
+        {
+            days: days,
+            hours: hours,
+            minutes: minutes,
+            seconds: seconds
+        }
 }
 
-function validWidgets(parentFieldset: HTMLFieldSetElement, selector : string) : string | number  {
+function validWidgets(parentFieldset: HTMLFieldSetElement, selector: string): string | number {
     const widgets = getIntegerInputValue(parentFieldset, selector);
     return widgets < 0 ? "Widgets cannot be below 0" : widgets
 }
 
-function validStrikes(parentFieldset: HTMLFieldSetElement, strikeSelector : string) : string | number  {
+function validStrikes(parentFieldset: HTMLFieldSetElement, strikeSelector: string): string | number {
     const strikes = getIntegerInputValue(parentFieldset, strikeSelector);
     return strikes < 1 ? "Strikes cannot be below 1" : strikes
 }
 
-function validNeedyTime(parentFieldset: HTMLFieldSetElement, selector : string) : string | number  {
+function validNeedyTime(parentFieldset: HTMLFieldSetElement, selector: string): string | number {
     const time = getIntegerInputValue(parentFieldset, selector);
     return time < 0 ? "Needy Activation Time cannot be below 0 seconds" : time
-    
-    
+
+
 }
 
 
@@ -417,7 +444,7 @@ function addError(errorArr: string[], element: Element | null, error: string) {
     markFieldInvalid(element, error);
 }
 
-function getFindElementError(container: Element | Document, selector: string) : Error {
+function getFindElementError(container: Element | Document, selector: string): Error {
     return new Error(`Could not find input matching selector: ${selector} on the container ${container}`);
 }
 
@@ -497,12 +524,12 @@ function getSelectorElement(container: Element | Document, selector: string): HT
     return container.querySelector<HTMLSelectElement>(selector);
 }
 
-function getSelectValue(container: Element | Document,selector: string): string {
+function getSelectValue(container: Element | Document, selector: string): string {
     let element = getSelectorElement(container, selector);
-    if(!element) {
+    if (!element) {
         throw getFindElementError(container, selector)
     }
-    return element.value;   
+    return element.value;
 }
 
 

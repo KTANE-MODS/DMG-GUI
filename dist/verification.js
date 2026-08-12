@@ -75,12 +75,18 @@ const elementSelectors = {
         needyTime: ".default-bomb-needy-time",
     },
     bomb: {
+        useDefaultTime: ".use-default-time",
+        useDefaultStrikes: ".use-default-strikes",
+        useDefaultWidgets: ".use-default-widgets",
+        useDefaultNeedyTime: ".use-default-needy-time",
+        useDefaultFrontOnly: ".use-default-front-only",
         days: ".bomb-days",
         hours: ".bomb-hours",
         minutes: ".bomb-minutes",
         seconds: ".bomb-seconds",
         strikes: ".bomb-strikes",
         widgets: ".bomb-widgets",
+        frontOnly: ".bomb-front-only",
         needyTime: ".bomb-needy-time",
     },
     pool: {
@@ -157,37 +163,60 @@ export function verifyFormInformation() {
     let bombFieldSets = document.querySelectorAll("#bomb-list fieldset.bomb");
     for (let bombFieldSet of bombFieldSets) {
         let bomb = {};
-        let timeFieldSet = bombFieldSet.querySelector(".bomb-time");
-        let time = validBombTime(timeFieldSet, elementSelectors.bomb.days, elementSelectors.bomb.hours, elementSelectors.bomb.minutes, elementSelectors.bomb.seconds);
-        if (typeof time === "string") {
-            addError(errors, timeFieldSet, time);
-        }
-        else {
-            bomb.time = time;
+        // time
+        let useDefaultTime = bombFieldSet.querySelector(elementSelectors.bomb.useDefaultTime).checked;
+        bomb.useDefaultTime = useDefaultTime;
+        if (!useDefaultTime) {
+            let timeFieldSet = bombFieldSet.querySelector(".bomb-time");
+            let time = validBombTime(timeFieldSet, elementSelectors.bomb.days, elementSelectors.bomb.hours, elementSelectors.bomb.minutes, elementSelectors.bomb.seconds);
+            if (typeof time === "string") {
+                addError(errors, timeFieldSet, time);
+            }
+            else {
+                bomb.time = time;
+            }
         }
         //strikes
-        const strikes = validStrikes(bombFieldSet, elementSelectors.bomb.strikes);
-        if (typeof (strikes) === "string") {
-            addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.strikes), strikes);
-        }
-        else {
-            bomb.strikes = strikes;
+        let useDefaultStrikes = bombFieldSet.querySelector(elementSelectors.bomb.useDefaultStrikes).checked;
+        bomb.useDefaultStrikes = useDefaultStrikes;
+        if (!useDefaultStrikes) {
+            const strikes = validStrikes(bombFieldSet, elementSelectors.bomb.strikes);
+            if (typeof (strikes) === "string") {
+                addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.strikes), strikes);
+            }
+            else {
+                bomb.strikes = strikes;
+            }
         }
         //Widgets is at least 0
-        const widgets = validWidgets(bombFieldSet, elementSelectors.bomb.widgets);
-        if (typeof (widgets) === "string") {
-            addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.widgets), widgets);
-        }
-        else {
-            bomb.widgets = widgets;
+        let useDefaultWidgets = bombFieldSet.querySelector(elementSelectors.bomb.useDefaultWidgets).checked;
+        bomb.useDefaultWidgets = useDefaultWidgets;
+        if (!useDefaultWidgets) {
+            const widgets = validWidgets(bombFieldSet, elementSelectors.bomb.widgets);
+            if (typeof (widgets) === "string") {
+                addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.widgets), widgets);
+            }
+            else {
+                bomb.widgets = widgets;
+            }
         }
         //needy activation time is at least 0 
-        const needyTime = validNeedyTime(bombFieldSet, elementSelectors.bomb.needyTime);
-        if (typeof (needyTime) === "string") {
-            addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.needyTime), needyTime);
+        let useDefaultNeedyActivationTime = bombFieldSet.querySelector(elementSelectors.bomb.useDefaultNeedyTime).checked;
+        bomb.useDefaultNeedyActivationTime = useDefaultNeedyActivationTime;
+        if (!useDefaultNeedyActivationTime) {
+            const needyTime = validNeedyTime(bombFieldSet, elementSelectors.bomb.needyTime);
+            if (typeof (needyTime) === "string") {
+                addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.needyTime), needyTime);
+            }
+            else {
+                bomb.needyActivationTime = needyTime;
+            }
         }
-        else {
-            bomb.needyActivationTime = needyTime;
+        //front only
+        let useDefaultFrontOnly = bombFieldSet.querySelector(elementSelectors.bomb.useDefaultFrontOnly).checked;
+        bomb.useDefaultFrontOnly = useDefaultFrontOnly;
+        if (!useDefaultFrontOnly) {
+            bomb.frontOnly = bombFieldSet.querySelector(elementSelectors.bomb.frontOnly).checked;
         }
         const poolFieldSets = bombFieldSet.querySelectorAll(".pool-list fieldset.pool");
         bomb.pools = [];
