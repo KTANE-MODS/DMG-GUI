@@ -2,7 +2,7 @@
 // todo add import for dmg
 
 import { getModulesByName } from "./modules.js";
-import { Bomb, FactoryMode, Mission, ModuleEntry, Pool, PoolType, PresetType } from "./types";
+import { Bomb, BombTime, DefaultBomb, FactoryMode, Mission, ModuleEntry, Pool, PoolType, PresetType } from "./types";
 
 const FIELD_INVALID_CLASS = "field-invalid";
 const FIELD_ERROR_CLASS = "field-error";
@@ -81,6 +81,17 @@ const elementSelectors = {
         factoryMode: ".factory-mode",
     },
 
+    defaultBomb: {
+         days: ".default-bomb-days",
+        hours: ".default-bomb-hours",
+      minutes: ".default-bomb-minutes",
+      seconds: ".default-bomb-seconds",
+      strikes: ".default-bomb-strikes",
+      widgets: ".default-bomb-widgets",
+    needyTime: ".default-bomb-needy-time",
+
+    },
+
     bomb: {
         days: ".bomb-days",
         hours: ".bomb-hours",
@@ -147,6 +158,20 @@ export function verifyFormInformation(): Mission | null {
 
     mission.globalTime = findTextInputElement(document, elementSelectors.global.globalTime)!.checked
     mission.globalStrikes = findTextInputElement(document, elementSelectors.global.globalStrikes)!.checked
+
+    //todo default bomb
+    let defaultBomb: DefaultBomb = {} as DefaultBomb
+    let defaultBombFieldSet = document.querySelector<HTMLFieldSetElement>(".default-bomb-time")!
+
+    let time = validBombTime(defaultBombFieldSet)
+
+    if(typeof time === "string") {
+        addError(errors, defaultBombFieldSet, time)
+    }
+
+    else {
+        defaultBomb.time = time;
+    }
 
     //for each bomb,
     mission.bombs = [];
@@ -326,6 +351,30 @@ export function verifyFormInformation(): Mission | null {
     }
 
     return mission
+}
+
+// If there is an error, return a string, otherwise return the bomb time
+function validBombTime(fieldset: HTMLFieldSetElement) : string | BombTime {
+    // Bomb Time is max 6 days
+    const DAYS_TO_SECONDS = 86400;
+    const days = getIntegerInputValue(fieldset, elementSelectors.defaultBomb.days);
+    const hours = getIntegerInputValue(fieldset, elementSelectors.defaultBomb.hours);
+    const minutes = getIntegerInputValue(fieldset, elementSelectors.defaultBomb.minutes);
+    const seconds = getIntegerInputValue(fieldset, elementSelectors.defaultBomb.seconds);
+
+    const totalBombTime = days * DAYS_TO_SECONDS +
+        hours * 3600 +
+        minutes * 60 +
+        seconds;
+
+    return totalBombTime / DAYS_TO_SECONDS > 6 ? 
+            "Bomb time cannot go above 6 days" : 
+            {
+                days: days,
+                hours: hours,
+                minutes: minutes,
+                seconds: seconds
+            }
 }
 
 function addError(errorArr: string[], element: Element | null, error: string) {

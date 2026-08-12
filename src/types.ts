@@ -32,6 +32,7 @@ export interface Mission {
     factoryMode: FactoryMode;
     globalTime: boolean;
     globalStrikes: boolean;
+    defaultBomb: DefaultBomb;
     bombs: Bomb[];
 }
 

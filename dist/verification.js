@@ -65,6 +65,15 @@ const elementSelectors = {
         globalStrikes: ".global-strikes",
         factoryMode: ".factory-mode",
     },
+    defaultBomb: {
+        days: ".default-bomb-days",
+        hours: ".default-bomb-hours",
+        minutes: ".default-bomb-minutes",
+        seconds: ".default-bomb-seconds",
+        strikes: ".default-bomb-strikes",
+        widgets: ".default-bomb-widgets",
+        needyTime: ".default-bomb-needy-time",
+    },
     bomb: {
         days: ".bomb-days",
         hours: ".bomb-hours",
@@ -115,6 +124,16 @@ export function verifyFormInformation() {
     mission.factoryMode = getTextInputValue(document, elementSelectors.global.factoryMode);
     mission.globalTime = findTextInputElement(document, elementSelectors.global.globalTime).checked;
     mission.globalStrikes = findTextInputElement(document, elementSelectors.global.globalStrikes).checked;
+    //todo default bomb
+    let defaultBomb = {};
+    let defaultBombFieldSet = document.querySelector(".default-bomb-time");
+    let time = validBombTime(defaultBombFieldSet);
+    if (typeof time === "string") {
+        addError(errors, defaultBombFieldSet, time);
+    }
+    else {
+        defaultBomb.time = time;
+    }
     //for each bomb,
     mission.bombs = [];
     let bombFieldSets = document.querySelectorAll("#bomb-list fieldset.bomb");
@@ -252,6 +271,27 @@ export function verifyFormInformation() {
         return null;
     }
     return mission;
+}
+// If there is an error, return a string, otherwise return the bomb time
+function validBombTime(fieldset) {
+    // Bomb Time is max 6 days
+    const DAYS_TO_SECONDS = 86400;
+    const days = getIntegerInputValue(fieldset, elementSelectors.defaultBomb.days);
+    const hours = getIntegerInputValue(fieldset, elementSelectors.defaultBomb.hours);
+    const minutes = getIntegerInputValue(fieldset, elementSelectors.defaultBomb.minutes);
+    const seconds = getIntegerInputValue(fieldset, elementSelectors.defaultBomb.seconds);
+    const totalBombTime = days * DAYS_TO_SECONDS +
+        hours * 3600 +
+        minutes * 60 +
+        seconds;
+    return totalBombTime / DAYS_TO_SECONDS > 6 ?
+        "Bomb time cannot go above 6 days" :
+        {
+            days: days,
+            hours: hours,
+            minutes: minutes,
+            seconds: seconds
+        };
 }
 function addError(errorArr, element, error) {
     errorArr.push(error);
