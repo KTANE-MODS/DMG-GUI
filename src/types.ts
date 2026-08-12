@@ -6,12 +6,24 @@ export interface BombTime {
 }
 
 export interface Bomb {
-    time: BombTime;
+    useDefaultTime: boolean;
+    time?: BombTime;
+    useDefaultStrikes: boolean;
     strikes: Number;
+    useDefaultFrontOnly: boolean;
     frontOnly: boolean;
+    useDefaultNeedyActivationTime: boolean;
     needyActivationTime: Number;
+    useDefaultWidgets: boolean;
     widgets: Number;
     pools: Pool[];
+}
+
+export interface DefaultBinding {
+    // The checkbox that says to use the default data
+    defaultCheckBox: HTMLInputElement,
+    // the input(s) that needs to be disabled if the default checkbox is checked
+    originalInputs: HTMLInputElement[]
 }
 
 export interface DefaultBomb {

@@ -34,7 +34,7 @@ export async function generateDMGText(mission: Mission) {
         let bombStr = `(\n`
 
         //todo time
-        let time = bomb.time
+        let time = bomb.time!
         time.hours = time.hours as number + (time.days as number * 24) as number;
         bombStr += `${time.hours}:${time.minutes}:${time.seconds}\n`
 

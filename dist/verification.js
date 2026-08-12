@@ -124,52 +124,43 @@ export function verifyFormInformation() {
     mission.factoryMode = getTextInputValue(document, elementSelectors.global.factoryMode);
     mission.globalTime = findTextInputElement(document, elementSelectors.global.globalTime).checked;
     mission.globalStrikes = findTextInputElement(document, elementSelectors.global.globalStrikes).checked;
-    //todo default bomb
+    //default bomb
+    // time
     let defaultBomb = {};
-    let defaultBombFieldSet = document.querySelector(".default-bomb-time");
-    let time = validBombTime(defaultBombFieldSet);
-    if (typeof time === "string") {
-        addError(errors, defaultBombFieldSet, time);
+    let defaultTimeFieldSet = document.querySelector(".default-bomb-time");
+    let defaultBombFieldSet = document.querySelector("#default-bomb");
+    let defaultTime = validBombTime(defaultTimeFieldSet, elementSelectors.defaultBomb.days, elementSelectors.defaultBomb.hours, elementSelectors.defaultBomb.minutes, elementSelectors.defaultBomb.seconds);
+    if (typeof defaultTime === "string") {
+        addError(errors, defaultTimeFieldSet, defaultTime);
     }
     else {
-        defaultBomb.time = time;
+        defaultBomb.time = defaultTime;
     }
+    //todo strikes
+    const defaultStrikes = validStrikes(defaultBombFieldSet, elementSelectors.defaultBomb.strikes);
+    if (typeof (defaultStrikes) === "string") {
+        addError(errors, findTextInputElement(defaultBombFieldSet, elementSelectors.defaultBomb.strikes), defaultStrikes);
+    }
+    mission.defaultBomb = defaultBomb;
     //for each bomb,
     mission.bombs = [];
     let bombFieldSets = document.querySelectorAll("#bomb-list fieldset.bomb");
     for (let bombFieldSet of bombFieldSets) {
         let bomb = {};
-        // Bomb Time is max 6 days
-        const DAYS_TO_SECONDS = 86400;
-        const days = getIntegerInputValue(bombFieldSet, elementSelectors.bomb.days);
-        const hours = getIntegerInputValue(bombFieldSet, elementSelectors.bomb.hours);
-        const minutes = getIntegerInputValue(bombFieldSet, elementSelectors.bomb.minutes);
-        const seconds = getIntegerInputValue(bombFieldSet, elementSelectors.bomb.seconds);
-        const totalBombTime = days * DAYS_TO_SECONDS +
-            hours * 3600 +
-            minutes * 60 +
-            seconds;
-        if (totalBombTime / DAYS_TO_SECONDS > 6) {
-            const bombTimeFieldset = bombFieldSet.querySelector(".bomb-time");
-            addError(errors, bombTimeFieldset, "Bomb time cannot go above 6 days");
+        let timeFieldSet = bombFieldSet.querySelector(".bomb-time");
+        let time = validBombTime(timeFieldSet, elementSelectors.bomb.days, elementSelectors.bomb.hours, elementSelectors.bomb.minutes, elementSelectors.bomb.seconds);
+        if (typeof time === "string") {
+            addError(errors, timeFieldSet, time);
         }
         else {
-            bomb.time = {
-                days: days,
-                hours: hours,
-                minutes: minutes,
-                seconds: seconds
-            };
+            bomb.time = time;
         }
-        //strikes is at least 1
-        const strikes = getIntegerInputValue(bombFieldSet, elementSelectors.bomb.strikes);
-        if (strikes < 1) {
-            addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.strikes), "Strikes cannot be below 1");
+        //todo strikes
+        const strikes = validStrikes(bombFieldSet, elementSelectors.bomb.strikes);
+        if (typeof (strikes) === "string") {
+            addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.strikes), strikes);
         }
-        else {
-            bomb.strikes = strikes;
-        }
-        //Widgets is at least 0
+        //todo Widgets is at least 0
         const widgets = getIntegerInputValue(bombFieldSet, elementSelectors.bomb.widgets);
         if (widgets < 0) {
             addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.widgets), "Widgets cannot be below 0");
@@ -177,7 +168,7 @@ export function verifyFormInformation() {
         else {
             bomb.widgets = widgets;
         }
-        //needy activation time is at least 0 
+        //todo needy activation time is at least 0 
         const needy = getIntegerInputValue(bombFieldSet, elementSelectors.bomb.needyTime);
         if (needy < 0) {
             addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.needyTime), "Needy Activation Time cannot be below 0 seconds");
@@ -273,13 +264,13 @@ export function verifyFormInformation() {
     return mission;
 }
 // If there is an error, return a string, otherwise return the bomb time
-function validBombTime(fieldset) {
+function validBombTime(fieldset, daySelector, hourSelector, minuteSelector, secondSelector) {
     // Bomb Time is max 6 days
     const DAYS_TO_SECONDS = 86400;
-    const days = getIntegerInputValue(fieldset, elementSelectors.defaultBomb.days);
-    const hours = getIntegerInputValue(fieldset, elementSelectors.defaultBomb.hours);
-    const minutes = getIntegerInputValue(fieldset, elementSelectors.defaultBomb.minutes);
-    const seconds = getIntegerInputValue(fieldset, elementSelectors.defaultBomb.seconds);
+    const days = getIntegerInputValue(fieldset, daySelector);
+    const hours = getIntegerInputValue(fieldset, hourSelector);
+    const minutes = getIntegerInputValue(fieldset, minuteSelector);
+    const seconds = getIntegerInputValue(fieldset, secondSelector);
     const totalBombTime = days * DAYS_TO_SECONDS +
         hours * 3600 +
         minutes * 60 +
@@ -292,6 +283,11 @@ function validBombTime(fieldset) {
             minutes: minutes,
             seconds: seconds
         };
+}
+function validStrikes(parentFieldset, strikeSelector) {
+    //strikes is at least 1
+    const strikes = getIntegerInputValue(parentFieldset, strikeSelector);
+    return strikes < 1 ? "Strikes cannot be below 1" : strikes;
 }
 function addError(errorArr, element, error) {
     errorArr.push(error);

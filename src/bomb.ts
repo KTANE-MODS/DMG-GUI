@@ -1,5 +1,6 @@
 // Knows how to create a bomb element
 import { createPoolElement } from "./pool.js";
+import { DefaultBinding } from "./types.js";
 
 export function createBombElement(): HTMLFieldSetElement {
 
@@ -188,9 +189,3 @@ function toggleDefaultElements(binding: DefaultBinding): void {
     binding.defaultCheckBox.addEventListener("change", applyState);
 }
 
-interface DefaultBinding {
-    // The checkbox that says to use the default data
-    defaultCheckBox: HTMLInputElement,
-    // the input(s) that needs to be disabled if the default checkbox is checked
-    originalInputs: HTMLInputElement[]
-}
