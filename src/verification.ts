@@ -184,11 +184,18 @@ export function verifyFormInformation(): Mission | null {
         addError(errors, findTextInputElement(defaultBombFieldSet, elementSelectors.defaultBomb.strikes), defaultStrikes);
     }
 
-    //todo widgets
+    //widgets
     const defaultWidgets = validWidgets(defaultBombFieldSet, elementSelectors.defaultBomb.widgets)
 
     if(typeof(defaultWidgets) === "string") {
         addError(errors, findTextInputElement(defaultBombFieldSet, elementSelectors.defaultBomb.widgets), defaultWidgets);
+    }
+
+    //needy time
+    const defaultNeedyTime = validNeedyTime(defaultBombFieldSet, elementSelectors.defaultBomb.needyTime)
+
+    if(typeof(defaultNeedyTime) === "string") {
+        addError(errors, findTextInputElement(defaultBombFieldSet, elementSelectors.defaultBomb.needyTime), defaultNeedyTime);
     }
 
     
@@ -228,7 +235,7 @@ export function verifyFormInformation(): Mission | null {
             bomb.strikes = strikes;
         }
 
-        //todo Widgets is at least 0
+        //Widgets is at least 0
         const widgets = validWidgets(bombFieldSet, elementSelectors.bomb.widgets)
         if(typeof(widgets) === "string") {
             addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.widgets), widgets);
@@ -237,14 +244,14 @@ export function verifyFormInformation(): Mission | null {
             bomb.widgets = widgets;
         }
 
-        //todo needy activation time is at least 0 
-        const needy = getIntegerInputValue(bombFieldSet, elementSelectors.bomb.needyTime);
+        //needy activation time is at least 0 
+        const needyTime = validNeedyTime(bombFieldSet, elementSelectors.bomb.needyTime)
 
-        if (needy < 0) {
-            addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.needyTime), "Needy Activation Time cannot be below 0 seconds")
+        if(typeof(needyTime) === "string") {
+            addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.needyTime), needyTime);
         }
         else {
-            bomb.needyActivationTime = needy;
+            bomb.needyActivationTime = needyTime;
         }
 
         const poolFieldSets = bombFieldSet.querySelectorAll<HTMLFieldSetElement>(".pool-list fieldset.pool")
@@ -396,6 +403,14 @@ function validStrikes(parentFieldset: HTMLFieldSetElement, strikeSelector : stri
     const strikes = getIntegerInputValue(parentFieldset, strikeSelector);
     return strikes < 1 ? "Strikes cannot be below 1" : strikes
 }
+
+function validNeedyTime(parentFieldset: HTMLFieldSetElement, selector : string) : string | number  {
+    const time = getIntegerInputValue(parentFieldset, selector);
+    return time < 0 ? "Needy Activation Time cannot be below 0 seconds" : time
+    
+    
+}
+
 
 function addError(errorArr: string[], element: Element | null, error: string) {
     errorArr.push(error);

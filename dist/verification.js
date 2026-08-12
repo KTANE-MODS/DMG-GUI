@@ -141,10 +141,15 @@ export function verifyFormInformation() {
     if (typeof (defaultStrikes) === "string") {
         addError(errors, findTextInputElement(defaultBombFieldSet, elementSelectors.defaultBomb.strikes), defaultStrikes);
     }
-    //todo widgets
+    //widgets
     const defaultWidgets = validWidgets(defaultBombFieldSet, elementSelectors.defaultBomb.widgets);
     if (typeof (defaultWidgets) === "string") {
         addError(errors, findTextInputElement(defaultBombFieldSet, elementSelectors.defaultBomb.widgets), defaultWidgets);
+    }
+    //needy time
+    const defaultNeedyTime = validNeedyTime(defaultBombFieldSet, elementSelectors.defaultBomb.needyTime);
+    if (typeof (defaultNeedyTime) === "string") {
+        addError(errors, findTextInputElement(defaultBombFieldSet, elementSelectors.defaultBomb.needyTime), defaultNeedyTime);
     }
     mission.defaultBomb = defaultBomb;
     //for each bomb,
@@ -168,7 +173,7 @@ export function verifyFormInformation() {
         else {
             bomb.strikes = strikes;
         }
-        //todo Widgets is at least 0
+        //Widgets is at least 0
         const widgets = validWidgets(bombFieldSet, elementSelectors.bomb.widgets);
         if (typeof (widgets) === "string") {
             addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.widgets), widgets);
@@ -176,13 +181,13 @@ export function verifyFormInformation() {
         else {
             bomb.widgets = widgets;
         }
-        //todo needy activation time is at least 0 
-        const needy = getIntegerInputValue(bombFieldSet, elementSelectors.bomb.needyTime);
-        if (needy < 0) {
-            addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.needyTime), "Needy Activation Time cannot be below 0 seconds");
+        //needy activation time is at least 0 
+        const needyTime = validNeedyTime(bombFieldSet, elementSelectors.bomb.needyTime);
+        if (typeof (needyTime) === "string") {
+            addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.needyTime), needyTime);
         }
         else {
-            bomb.needyActivationTime = needy;
+            bomb.needyActivationTime = needyTime;
         }
         const poolFieldSets = bombFieldSet.querySelectorAll(".pool-list fieldset.pool");
         bomb.pools = [];
@@ -299,6 +304,10 @@ function validWidgets(parentFieldset, selector) {
 function validStrikes(parentFieldset, strikeSelector) {
     const strikes = getIntegerInputValue(parentFieldset, strikeSelector);
     return strikes < 1 ? "Strikes cannot be below 1" : strikes;
+}
+function validNeedyTime(parentFieldset, selector) {
+    const time = getIntegerInputValue(parentFieldset, selector);
+    return time < 0 ? "Needy Activation Time cannot be below 0 seconds" : time;
 }
 function addError(errorArr, element, error) {
     errorArr.push(error);
