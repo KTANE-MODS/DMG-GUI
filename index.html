@@ -1,82 +1,137 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>KTANE DMG GUI</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
     <h1>KTANE DMG GUI</h1>
-
     <h2 id="error-message">Loading JSON...</h2>
     <form id="mission-form" hidden>
+      <section id="global-settings">
+        <h2>Global Settings</h2>
+        <label>
+          Mission Name
+          <input type="input" class="mission-name" />
+        </label>
+        <label>
+          Mission Description
+          <textarea class="mission-description"></textarea>
+        </label>
+        <label>
+          Time Mode
+          <select class="time-mode">
+            <option>Normal</option>
+            <option>Time</option>
+            <option>Zen</option>
+            <option>Steady</option>
+          </select>
+        </label>
+        <label>
+          Room (Optional)
+          <input type="input" class="room" />
+        </label>
+        <h3>Factory Mode</h3>
+        <label>
+          Mode
+          <select class="factory-mode">
+            <option>Static</option>
+            <option>Infinite</option>
+            <option>Finite</option>
+          </select>
+        </label>
+        <label>
+          <input type="checkbox" class="global-time" />
+          Global Time
+        </label>
+        <label>
+          <input type="checkbox" class="global-strikes" />
+          Global Strikes
+        </label>
+      </section>
 
-        <section id="global-settings">
-            <h2>Global Settings</h2>
+      <hr />
+
+      <section id="bombs-section">
+        <h2>Bombs</h2>
+        <fieldset class="default-bomb" id="default-bomb">
+          <legend>Default Bomb Info</legend>
+          <fieldset class="default-bomb-time">
+            <legend>Bomb Time</legend>
+
             <label>
-                Mission Name
-                <input type="input" class="mission-name">
+              Days
+              <input type="number" class="default-bomb-days" min="0" max="6" value="0" />
+            </label>
+
+            <label>
+              Hours
+              <input
+                type="number"
+                class="default-bomb-hours"
+                min="0"
+                max="23"
+                value="0"
+              />
+            </label>
+
+            <label>
+              Minutes
+              <input
+                type="number"
+                class="default-bomb-minutes"
+                min="0"
+                max="59"
+                value="2"
+              />
             </label>
             <label>
-                Mission Description
-                <textarea class="mission-description"></textarea>
+              Seconds
+              <input
+                type="number"
+                class="default-bomb-seconds"
+                min="0"
+                max="59"
+                value="0"
+              />
             </label>
-            <label>
-                Time Mode
-                <select class="time-mode">
-                    <option>Normal</option>
-                    <option>Time</option>
-                    <option>Zen</option>
-                    <option>Steady</option>
-                </select>
-            </label>
-            <label>
-                Room (Optional)
-                <input type="input" class="room">
-            </label>
-            <h3>Factory Mode</h3>
-            <label>
-                Mode
-                <select class="factory-mode">
-                    <option>Static</option>
-                    <option>Infinite</option>
-                    <option>Finite</option>
-                </select>
-            </label>
-            <label>
-                <input type="checkbox" class="global-time">
-                Global Time
-            </label>
-            <label>
-                <input type="checkbox" class="global-strikes">
-                Global Strikes
-            </label>
-        </section>
+          </fieldset>
+          <label>
+            Strikes
+            <input type="number" min="1" value="3" class="default-bomb-strikes" />
+          </label>
+          <label>
+            Widgets
+            <input type="number" value="5" class="default-bomb-widgets" />
+          </label>
+          <label>
+            Needy Activation Time (in seconds)
+            <input type="number" min="0" value="90" class="default-bomb-needy-time" />
+          </label>
+          <label>
+            <input type="checkbox" class="default-bomb-front-only" />
+            Front Only
+          </label>
+        </fieldset>
+        <hr />
 
-        <hr>
+        <div id="bomb-list"></div>
+        <button type="button" id="add-bomb">+ Add Bomb</button>
+      </section>
 
-        <section id="bombs-section">
-            <div class="section-header">
-                <h2>Bombs</h2>
-            </div>
+      <hr />
 
-            <div id="bomb-list">
-            </div>
-            <button type="button" id="add-bomb">+ Add Bomb</button>
-        </section>
-
-        <hr>
-
-        <button type="button" id="generate">
-            Generate Mission
-        </button>
-
+      <button type="button" id="generate">Generate Mission</button>
     </form>
 
     <script type="module" src="dist/main.js"></script>
-</body>
+  </body>
 </html>

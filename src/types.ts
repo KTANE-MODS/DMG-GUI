@@ -14,6 +14,14 @@ export interface Bomb {
     pools: Pool[];
 }
 
+export interface DefaultBomb {
+    time: BombTime;
+    strikes: Number;
+    frontOnly: boolean;
+    needyActivationTime: Number;
+    widgets: Number;
+}
+
 export type FactoryMode = 'Static' | 'Infinite' | 'Finite'
 
 export interface Mission {

@@ -9,7 +9,7 @@ export function createBombElement(): HTMLFieldSetElement {
 
     fieldset.innerHTML = `
         <legend>Bomb</legend>
-
+        
         <fieldset class="bomb-time">
             <legend>Bomb Time</legend>
 
@@ -51,31 +51,62 @@ export function createBombElement(): HTMLFieldSetElement {
                     max="59"
                     value="0">
             </label>
+
+        <label class="use-default-toggle">
+            <input type="checkbox" class="use-default-time">
+            Use default
+        </label>
         </fieldset>
-        <label>
-            Strikes
-            <input type="number" min="1" value="3" class="bomb-strikes">
-        </label>
 
-        <label>
-            Widgets
-            <input type="number" value="5" class="bomb-widgets">
-        </label>
 
-        <label>
-            Needy Activation Time (in seconds)
-            <input 
-                type="number" 
-                min="0" 
-                value="90"
-                class="bomb-needy-time"
+        <div class="field-with-default">
+            <label>
+                Strikes
+                <input type="number" min="1" value="3" class="bomb-strikes">
+            </label>
+            <label class="use-default-toggle">
+                <input type="checkbox" class="use-default-strikes">
+                Use default
+            </label>
+        </div>
+
+        <div class="field-with-default">
+            <label>
+                Widgets
+                <input type="number" value="5" class="bomb-widgets">
+            </label>
+            <label class="use-default-toggle">
+                <input type="checkbox" class="use-default-widgets">
+                Use default
+            </label>
+        </div>
+
+        <div class="field-with-default">
+            <label>
+                Needy Activation Time (in seconds)
+                <input
+                    type="number"
+                    min="0"
+                    value="90"
+                    class="bomb-needy-time"
                 >
-        </label>
+            </label>
+            <label class="use-default-toggle">
+                <input type="checkbox" class="use-default-needy-time">
+                Use default
+            </label>
+        </div>
 
-        <label>
-            <input type="checkbox">
-            Front Only
-        </label>
+        <div class="field-with-default">
+            <label>
+                Front Only
+                <input type="checkbox" class="bomb-front-only">
+            </label>
+            <label class="use-default-toggle">
+                <input type="checkbox" class="use-default-front-only">
+                Use default
+            </label>
+        </div>
 
         <hr>
 
