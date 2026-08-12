@@ -136,10 +136,15 @@ export function verifyFormInformation() {
     else {
         defaultBomb.time = defaultTime;
     }
-    //todo strikes
+    //strikes
     const defaultStrikes = validStrikes(defaultBombFieldSet, elementSelectors.defaultBomb.strikes);
     if (typeof (defaultStrikes) === "string") {
         addError(errors, findTextInputElement(defaultBombFieldSet, elementSelectors.defaultBomb.strikes), defaultStrikes);
+    }
+    //todo widgets
+    const defaultWidgets = validWidgets(defaultBombFieldSet, elementSelectors.defaultBomb.widgets);
+    if (typeof (defaultWidgets) === "string") {
+        addError(errors, findTextInputElement(defaultBombFieldSet, elementSelectors.defaultBomb.widgets), defaultWidgets);
     }
     mission.defaultBomb = defaultBomb;
     //for each bomb,
@@ -155,15 +160,18 @@ export function verifyFormInformation() {
         else {
             bomb.time = time;
         }
-        //todo strikes
+        //strikes
         const strikes = validStrikes(bombFieldSet, elementSelectors.bomb.strikes);
         if (typeof (strikes) === "string") {
             addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.strikes), strikes);
         }
+        else {
+            bomb.strikes = strikes;
+        }
         //todo Widgets is at least 0
-        const widgets = getIntegerInputValue(bombFieldSet, elementSelectors.bomb.widgets);
-        if (widgets < 0) {
-            addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.widgets), "Widgets cannot be below 0");
+        const widgets = validWidgets(bombFieldSet, elementSelectors.bomb.widgets);
+        if (typeof (widgets) === "string") {
+            addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.widgets), widgets);
         }
         else {
             bomb.widgets = widgets;
@@ -284,8 +292,11 @@ function validBombTime(fieldset, daySelector, hourSelector, minuteSelector, seco
             seconds: seconds
         };
 }
+function validWidgets(parentFieldset, selector) {
+    const widgets = getIntegerInputValue(parentFieldset, selector);
+    return widgets < 0 ? "Widgets cannot be below 0" : widgets;
+}
 function validStrikes(parentFieldset, strikeSelector) {
-    //strikes is at least 1
     const strikes = getIntegerInputValue(parentFieldset, strikeSelector);
     return strikes < 1 ? "Strikes cannot be below 1" : strikes;
 }
