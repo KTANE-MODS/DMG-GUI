@@ -444,14 +444,14 @@ fieldset.pool > legend {
 /* When a field is pulling from the default bomb, dim + disable it and
    swap its border to dashed so it visually reads as "linked" rather than
    just "broken/disabled". */
-.uses-default input:not([type="checkbox"]):disabled,
-.uses-default select:disabled {
+input:not([type="checkbox"]):disabled,
+select:disabled {
     opacity: 0.4;
     border-style: dashed;
     color: var(--text-dim);
 }
 
-.uses-default input[type="checkbox"]:disabled {
+input[type="checkbox"]:disabled {
     opacity: 0.4;
 }
 

@@ -120,6 +120,28 @@ export function createBombElement() {
             Remove Bomb
         </button>
     `;
+    const bombTime = fieldset.querySelector(".bomb-time");
+    toggleDefaultElements({
+        defaultCheckBox: fieldset.querySelector(".use-default-time"),
+        originalInputs: ["days", "hours", "minutes", "seconds"]
+            .map(s => bombTime.querySelector(`.bomb-${s}`))
+    });
+    toggleDefaultElements({
+        defaultCheckBox: fieldset.querySelector(".use-default-strikes"),
+        originalInputs: [fieldset.querySelector(".bomb-strikes")]
+    });
+    toggleDefaultElements({
+        defaultCheckBox: fieldset.querySelector(".use-default-widgets"),
+        originalInputs: [fieldset.querySelector(".bomb-widgets")]
+    });
+    toggleDefaultElements({
+        defaultCheckBox: fieldset.querySelector(".use-default-needy-time"),
+        originalInputs: [fieldset.querySelector(".bomb-needy-time")]
+    });
+    toggleDefaultElements({
+        defaultCheckBox: fieldset.querySelector(".use-default-front-only"),
+        originalInputs: [fieldset.querySelector(".bomb-front-only")]
+    });
     const poolList = fieldset.querySelector(".pool-list");
     fieldset
         .querySelector(".add-pool")
@@ -134,5 +156,15 @@ export function createBombElement() {
     // Every bomb starts with one pool
     poolList.appendChild(createPoolElement());
     return fieldset;
+}
+// Disable inputs if use default is checked
+function toggleDefaultElements(binding) {
+    const applyState = () => {
+        binding.originalInputs.forEach(input => {
+            input.disabled = binding.defaultCheckBox.checked;
+        });
+    };
+    applyState();
+    binding.defaultCheckBox.addEventListener("change", applyState);
 }
 //# sourceMappingURL=bomb.js.map

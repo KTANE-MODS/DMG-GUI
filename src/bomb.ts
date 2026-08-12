@@ -125,6 +125,35 @@ export function createBombElement(): HTMLFieldSetElement {
         </button>
     `;
 
+
+    const bombTime = fieldset.querySelector<HTMLFieldSetElement>(".bomb-time")!;
+    toggleDefaultElements({
+        defaultCheckBox: fieldset.querySelector<HTMLInputElement>(".use-default-time")!,
+        originalInputs: ["days", "hours", "minutes", "seconds"]
+                        .map(s => bombTime.querySelector<HTMLInputElement>(`.bomb-${s}`)!) 
+    } as DefaultBinding)
+
+    toggleDefaultElements({
+        defaultCheckBox: fieldset.querySelector<HTMLInputElement>(".use-default-strikes")!,
+        originalInputs: [fieldset.querySelector<HTMLInputElement>(".bomb-strikes")!]
+    })
+
+    toggleDefaultElements({
+        defaultCheckBox: fieldset.querySelector<HTMLInputElement>(".use-default-widgets")!,
+        originalInputs: [fieldset.querySelector<HTMLInputElement>(".bomb-widgets")!]
+    })
+
+    toggleDefaultElements({
+        defaultCheckBox: fieldset.querySelector<HTMLInputElement>(".use-default-needy-time")!,
+        originalInputs: [fieldset.querySelector<HTMLInputElement>(".bomb-needy-time")!]
+    })
+
+    toggleDefaultElements({
+        defaultCheckBox: fieldset.querySelector<HTMLInputElement>(".use-default-front-only")!,
+        originalInputs: [fieldset.querySelector<HTMLInputElement>(".bomb-front-only")!]
+    })
+
+
     const poolList = fieldset.querySelector(".pool-list")!;
 
     fieldset
@@ -144,4 +173,24 @@ export function createBombElement(): HTMLFieldSetElement {
     poolList.appendChild(createPoolElement());
 
     return fieldset;
+}
+
+// Disable inputs if use default is checked
+function toggleDefaultElements(binding: DefaultBinding): void {
+    const applyState = (): void => {
+        binding.originalInputs.forEach(input => {
+            input.disabled = binding.defaultCheckBox.checked;
+        })
+    }
+
+    applyState();
+
+    binding.defaultCheckBox.addEventListener("change", applyState);
+}
+
+interface DefaultBinding {
+    // The checkbox that says to use the default data
+    defaultCheckBox: HTMLInputElement,
+    // the input(s) that needs to be disabled if the default checkbox is checked
+    originalInputs: HTMLInputElement[]
 }
