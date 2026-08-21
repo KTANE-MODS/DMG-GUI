@@ -1,4 +1,4 @@
-import { Mission } from "./types";
+import { BombTime, Mission } from "./types";
 import { getModulesByName } from "./modules.js";
 import { saveTextFile } from "./io.js";
 
@@ -6,18 +6,18 @@ export async function generateDMGText(mission: Mission) {
     let modulesByName = getModulesByName();
     let missionStr = ""
 
-    // todo mission name
+    //mission name
     missionStr += `///${mission.name}\n`
 
-    // todo mission description
+    // mission description
     missionStr += `${mission.description.split("\n").map(line => `///${line.trim()}`).join("\n")}\n`;
 
-    // todo room
+    //room
     if(mission.room != undefined) {
         missionStr += `${mission.room}\n`
     }
     
-    //todo factory mode
+    //factory mode
     let factoryMode = mission.factoryMode
     let factoryStr = `factory:${factoryMode.toLocaleLowerCase()}`
 
@@ -29,26 +29,44 @@ export async function generateDMGText(mission: Mission) {
 
     missionStr += `${factoryStr}\n`;
 
+    //todo default time
+    missionStr += getBombTime(mission.defaultBomb.time)
+
+    //todo default strike
+    missionStr += getStrikes(mission.defaultBomb.strikes)
+
+    //todo default widgets
+    missionStr += getWidgets(mission.defaultBomb.widgets)
+
+    //todo default needy time
+    missionStr += getNeedyActivationTime(mission.defaultBomb.needyActivationTime)
+
     //todo bombs
     for(let bomb of mission.bombs) {
         let bombStr = `(\n`
 
         //todo time
-        let time = bomb.time!
-        time.hours = time.hours as number + (time.days as number * 24) as number;
-        bombStr += `${time.hours}:${time.minutes}:${time.seconds}\n`
+        if(!bomb.useDefaultTime) {
+            missionStr += getBombTime(bomb.time!)
+        }
+        
 
         //todo strikes
-        bombStr += `${bomb.strikes}X\n`
+        if(!bomb.useDefaultStrikes) {
+            bombStr += getStrikes(bomb.strikes)
+        }
 
         //todo widgets
-        bombStr += `widgets:${bomb.widgets}\n`
+        if(!bomb.useDefaultWidgets) {
+            bombStr += getWidgets(bomb.widgets)
+        }
 
         //todo needy activation time
-        bombStr += `needyactivationtime:${bomb.needyActivationTime}\n`
+        bombStr += getNeedyActivationTime(bomb.needyActivationTime)
+        
 
         //todo front only
-        if(bomb.frontOnly) {
+        if((bomb.useDefaultFrontOnly && mission.defaultBomb.frontOnly) || (!bomb.useDefaultFrontOnly && bomb.frontOnly)) {
             bombStr += `frontonly\n`
         }
 
@@ -91,4 +109,21 @@ export async function generateDMGText(mission: Mission) {
     console.log(missionStr)
 
     await(saveTextFile(mission.name, missionStr))
+}
+
+function getBombTime(time: BombTime) {
+    let hours = time.hours as number + (time.days as number * 24) as number;
+    return `${hours}:${time.minutes}:${time.seconds}\n`
+}
+
+function getStrikes(strikes: Number) {
+    return `${strikes}X\n`;
+}
+
+function getWidgets(widgets: Number) {
+    return `widgets:${widgets}\n`;
+}
+
+function getNeedyActivationTime(time: Number) {
+    return `needyactivationtime:${time}\n`
 }

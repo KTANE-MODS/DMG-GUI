@@ -3,15 +3,15 @@ import { saveTextFile } from "./io.js";
 export async function generateDMGText(mission) {
     let modulesByName = getModulesByName();
     let missionStr = "";
-    // todo mission name
+    //mission name
     missionStr += `///${mission.name}\n`;
-    // todo mission description
+    // mission description
     missionStr += `${mission.description.split("\n").map(line => `///${line.trim()}`).join("\n")}\n`;
-    // todo room
+    //room
     if (mission.room != undefined) {
         missionStr += `${mission.room}\n`;
     }
-    //todo factory mode
+    //factory mode
     let factoryMode = mission.factoryMode;
     let factoryStr = `factory:${factoryMode.toLocaleLowerCase()}`;
     /* //todo change the gui so if mode is set to "Static",
@@ -20,21 +20,33 @@ export async function generateDMGText(mission) {
         factoryStr += `${mission.globalTime ? "gtime" : ""}${mission.globalStrikes ? "gstrikes" : ""}`;
     }
     missionStr += `${factoryStr}\n`;
+    //todo default time
+    missionStr += getBombTime(mission.defaultBomb.time);
+    //todo default strike
+    missionStr += getStrikes(mission.defaultBomb.strikes);
+    //todo default widgets
+    missionStr += getWidgets(mission.defaultBomb.widgets);
+    //todo default needy time
+    missionStr += getNeedyActivationTime(mission.defaultBomb.needyActivationTime);
     //todo bombs
     for (let bomb of mission.bombs) {
         let bombStr = `(\n`;
         //todo time
-        let time = bomb.time;
-        time.hours = time.hours + (time.days * 24);
-        bombStr += `${time.hours}:${time.minutes}:${time.seconds}\n`;
+        if (!bomb.useDefaultTime) {
+            missionStr += getBombTime(bomb.time);
+        }
         //todo strikes
-        bombStr += `${bomb.strikes}X\n`;
+        if (!bomb.useDefaultStrikes) {
+            bombStr += getStrikes(bomb.strikes);
+        }
         //todo widgets
-        bombStr += `widgets:${bomb.widgets}\n`;
+        if (!bomb.useDefaultWidgets) {
+            bombStr += getWidgets(bomb.widgets);
+        }
         //todo needy activation time
-        bombStr += `needyactivationtime:${bomb.needyActivationTime}\n`;
+        bombStr += getNeedyActivationTime(bomb.needyActivationTime);
         //todo front only
-        if (bomb.frontOnly) {
+        if ((bomb.useDefaultFrontOnly && mission.defaultBomb.frontOnly) || (!bomb.useDefaultFrontOnly && bomb.frontOnly)) {
             bombStr += `frontonly\n`;
         }
         //todo pools
@@ -70,5 +82,18 @@ export async function generateDMGText(mission) {
     }
     console.log(missionStr);
     await (saveTextFile(mission.name, missionStr));
+}
+function getBombTime(time) {
+    let hours = time.hours + (time.days * 24);
+    return `${hours}:${time.minutes}:${time.seconds}\n`;
+}
+function getStrikes(strikes) {
+    return `${strikes}X\n`;
+}
+function getWidgets(widgets) {
+    return `widgets:${widgets}\n`;
+}
+function getNeedyActivationTime(time) {
+    return `needyactivationtime:${time}\n`;
 }
 //# sourceMappingURL=mission.js.map

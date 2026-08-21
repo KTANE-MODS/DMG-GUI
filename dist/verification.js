@@ -35,27 +35,6 @@ function markFieldInvalid(element, message) {
         ? `${errorSpan.textContent} ${message}`
         : message;
 }
-// Same idea as markFieldInvalid, but for a whole fieldset (e.g. the bomb
-// time group of four inputs) where a single error applies to the group.
-// The message is placed right after the legend.
-function markFieldsetInvalid(fieldset, message) {
-    fieldset.classList.add(FIELD_INVALID_CLASS);
-    let errorSpan = fieldset.querySelector(`:scope > .${FIELD_ERROR_CLASS}`);
-    if (!errorSpan) {
-        errorSpan = document.createElement("span");
-        errorSpan.className = FIELD_ERROR_CLASS;
-        const legend = fieldset.querySelector("legend");
-        if (legend) {
-            legend.after(errorSpan);
-        }
-        else {
-            fieldset.prepend(errorSpan);
-        }
-    }
-    errorSpan.textContent = errorSpan.textContent
-        ? `${errorSpan.textContent} ${message}`
-        : message;
-}
 const elementSelectors = {
     global: {
         missionName: ".mission-name",
