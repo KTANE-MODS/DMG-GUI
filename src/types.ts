@@ -9,13 +9,13 @@ export interface Bomb {
     useDefaultTime: boolean;
     time?: BombTime;
     useDefaultStrikes: boolean;
-    strikes: Number;
+    strikes?: Number;
     useDefaultFrontOnly: boolean;
     frontOnly: boolean;
     useDefaultNeedyActivationTime: boolean;
-    needyActivationTime: Number;
+    needyActivationTime?: Number;
     useDefaultWidgets: boolean;
-    widgets: Number;
+    widgets?: Number;
     pools: Pool[];
 }
 

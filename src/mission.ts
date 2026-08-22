@@ -2,6 +2,12 @@ import { BombTime, Mission } from "./types";
 import { getModulesByName } from "./modules.js";
 import { saveTextFile } from "./io.js";
 
+/* //todo: if any of the following are the same as the default, don't include it for a individual bomb:
+    time
+    strikes
+    widget
+    needy time
+*/
 export async function generateDMGText(mission: Mission) {
     let modulesByName = getModulesByName();
     let missionStr = ""
@@ -22,55 +28,57 @@ export async function generateDMGText(mission: Mission) {
     let factoryStr = `factory:${factoryMode.toLocaleLowerCase()}`
 
     /* //todo change the gui so if mode is set to "Static", 
-     then hide the globalTime / globalStrikes checkboxes */
+         todo then hide the globalTime / globalStrikes checkboxes */
     if(factoryMode != "Static") {
         factoryStr += `${mission.globalTime ? "gtime" : ""}${mission.globalStrikes ? "gstrikes" : ""}`
     }
 
     missionStr += `${factoryStr}\n`;
 
-    //todo default time
+    //default time
     missionStr += getBombTime(mission.defaultBomb.time)
 
-    //todo default strike
+    //default strike
     missionStr += getStrikes(mission.defaultBomb.strikes)
 
-    //todo default widgets
+    //default widgets
     missionStr += getWidgets(mission.defaultBomb.widgets)
 
-    //todo default needy time
+    //default needy time
     missionStr += getNeedyActivationTime(mission.defaultBomb.needyActivationTime)
 
     //todo bombs
     for(let bomb of mission.bombs) {
         let bombStr = `(\n`
 
-        //todo time
+        //time
         if(!bomb.useDefaultTime) {
-            missionStr += getBombTime(bomb.time!)
+            bombStr += getBombTime(bomb.time!)
         }
         
 
-        //todo strikes
+        //strikes
         if(!bomb.useDefaultStrikes) {
-            bombStr += getStrikes(bomb.strikes)
+            bombStr += getStrikes(bomb.strikes!)
         }
 
-        //todo widgets
+        //widgets
         if(!bomb.useDefaultWidgets) {
-            bombStr += getWidgets(bomb.widgets)
+            bombStr += getWidgets(bomb.widgets!)
         }
 
-        //todo needy activation time
-        bombStr += getNeedyActivationTime(bomb.needyActivationTime)
+        //needy activation time
+        if(!bomb.useDefaultNeedyActivationTime) {
+            bombStr += getNeedyActivationTime(bomb.needyActivationTime!)
+        }
         
 
-        //todo front only
+        //front only
         if((bomb.useDefaultFrontOnly && mission.defaultBomb.frontOnly) || (!bomb.useDefaultFrontOnly && bomb.frontOnly)) {
             bombStr += `frontonly\n`
         }
 
-        //todo pools
+        //pools
         for(let pool of bomb.pools) {
 
             let poolStr = `${pool.distinct ? "!" : ""}${pool.occurrence}*`

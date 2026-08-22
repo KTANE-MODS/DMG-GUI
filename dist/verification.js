@@ -52,6 +52,7 @@ const elementSelectors = {
         strikes: ".default-bomb-strikes",
         widgets: ".default-bomb-widgets",
         needyTime: ".default-bomb-needy-time",
+        frontOnly: ".default-bomb-front-only",
     },
     bomb: {
         useDefaultTime: ".use-default-time",
@@ -89,7 +90,7 @@ export function verifyFormInformation() {
     //verify mission name trimmed is not blank
     const missionName = getTextInputValue(globalSettings, elementSelectors.global.missionName);
     if (missionName.length == 0) {
-        addError(errors, findTextInputElement(globalSettings, elementSelectors.global.missionName), "Mission name is empty");
+        addError(errors, findInputElement(globalSettings, elementSelectors.global.missionName), "Mission name is empty");
     }
     else {
         mission.name = missionName;
@@ -107,10 +108,9 @@ export function verifyFormInformation() {
         mission.room = room;
     }
     mission.factoryMode = getTextInputValue(document, elementSelectors.global.factoryMode);
-    mission.globalTime = findTextInputElement(document, elementSelectors.global.globalTime).checked;
-    mission.globalStrikes = findTextInputElement(document, elementSelectors.global.globalStrikes).checked;
-    //default bomb
-    // time
+    mission.globalTime = findInputElement(document, elementSelectors.global.globalTime).checked;
+    mission.globalStrikes = findInputElement(document, elementSelectors.global.globalStrikes).checked;
+    // default time
     let defaultBomb = {};
     let defaultTimeFieldSet = document.querySelector(".default-bomb-time");
     let defaultBombFieldSet = document.querySelector("#default-bomb");
@@ -121,21 +121,32 @@ export function verifyFormInformation() {
     else {
         defaultBomb.time = defaultTime;
     }
-    //strikes
+    //default strikes
     const defaultStrikes = validStrikes(defaultBombFieldSet, elementSelectors.defaultBomb.strikes);
     if (typeof (defaultStrikes) === "string") {
-        addError(errors, findTextInputElement(defaultBombFieldSet, elementSelectors.defaultBomb.strikes), defaultStrikes);
+        addError(errors, findInputElement(defaultBombFieldSet, elementSelectors.defaultBomb.strikes), defaultStrikes);
     }
-    //widgets
+    else {
+        defaultBomb.strikes = defaultStrikes;
+    }
+    //default widgets
     const defaultWidgets = validWidgets(defaultBombFieldSet, elementSelectors.defaultBomb.widgets);
     if (typeof (defaultWidgets) === "string") {
-        addError(errors, findTextInputElement(defaultBombFieldSet, elementSelectors.defaultBomb.widgets), defaultWidgets);
+        addError(errors, findInputElement(defaultBombFieldSet, elementSelectors.defaultBomb.widgets), defaultWidgets);
     }
-    //needy time
+    else {
+        defaultBomb.widgets = defaultWidgets;
+    }
+    //default needy time
     const defaultNeedyTime = validNeedyTime(defaultBombFieldSet, elementSelectors.defaultBomb.needyTime);
     if (typeof (defaultNeedyTime) === "string") {
-        addError(errors, findTextInputElement(defaultBombFieldSet, elementSelectors.defaultBomb.needyTime), defaultNeedyTime);
+        addError(errors, findInputElement(defaultBombFieldSet, elementSelectors.defaultBomb.needyTime), defaultNeedyTime);
     }
+    else {
+        defaultBomb.needyActivationTime = defaultNeedyTime;
+    }
+    //default front only
+    defaultBomb.frontOnly = findInputElement(defaultBombFieldSet, elementSelectors.defaultBomb.frontOnly).checked;
     mission.defaultBomb = defaultBomb;
     //for each bomb,
     mission.bombs = [];
@@ -161,7 +172,7 @@ export function verifyFormInformation() {
         if (!useDefaultStrikes) {
             const strikes = validStrikes(bombFieldSet, elementSelectors.bomb.strikes);
             if (typeof (strikes) === "string") {
-                addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.strikes), strikes);
+                addError(errors, findInputElement(bombFieldSet, elementSelectors.bomb.strikes), strikes);
             }
             else {
                 bomb.strikes = strikes;
@@ -173,7 +184,7 @@ export function verifyFormInformation() {
         if (!useDefaultWidgets) {
             const widgets = validWidgets(bombFieldSet, elementSelectors.bomb.widgets);
             if (typeof (widgets) === "string") {
-                addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.widgets), widgets);
+                addError(errors, findInputElement(bombFieldSet, elementSelectors.bomb.widgets), widgets);
             }
             else {
                 bomb.widgets = widgets;
@@ -185,7 +196,7 @@ export function verifyFormInformation() {
         if (!useDefaultNeedyActivationTime) {
             const needyTime = validNeedyTime(bombFieldSet, elementSelectors.bomb.needyTime);
             if (typeof (needyTime) === "string") {
-                addError(errors, findTextInputElement(bombFieldSet, elementSelectors.bomb.needyTime), needyTime);
+                addError(errors, findInputElement(bombFieldSet, elementSelectors.bomb.needyTime), needyTime);
             }
             else {
                 bomb.needyActivationTime = needyTime;
@@ -205,7 +216,7 @@ export function verifyFormInformation() {
             //verify occurrence is at least 1
             const occurrences = getIntegerInputValue(poolFieldSet, elementSelectors.pool.occurrence);
             if (occurrences < 1) {
-                addError(errors, findTextInputElement(poolFieldSet, elementSelectors.pool.occurrence), "Occurrences cannot be below 1");
+                addError(errors, findInputElement(poolFieldSet, elementSelectors.pool.occurrence), "Occurrences cannot be below 1");
             }
             pool.occurrence = occurrences;
             const poolType = getTextInputValue(poolFieldSet, elementSelectors.pool.type);
@@ -216,7 +227,7 @@ export function verifyFormInformation() {
                     //preset is "profile" or "needy profile", verify json input is not empty
                     const presetType = getSelectValue(poolFieldSet, elementSelectors.pool.presetType);
                     if (["Profile", "Needy Profile"].includes(presetType)) {
-                        const fileInput = findTextInputElement(poolFieldSet, elementSelectors.pool.fileInput);
+                        const fileInput = findInputElement(poolFieldSet, elementSelectors.pool.fileInput);
                         const fileList = fileInput.files;
                         if (fileList.length < 1) {
                             addError(errors, fileInput, "There must be profile attached");
@@ -237,7 +248,7 @@ export function verifyFormInformation() {
                         //verify module name is one of the ones loaded from the json
                         const moduleName = getTextInputValue(modEntry, elementSelectors.pool.moduleName);
                         if (!modulesByName.has(moduleName)) {
-                            addError(errors, findTextInputElement(modEntry, elementSelectors.pool.moduleName), `"${moduleName}" is not a valid module name.`);
+                            addError(errors, findInputElement(modEntry, elementSelectors.pool.moduleName), `"${moduleName}" is not a valid module name.`);
                         }
                         else {
                             entry.moduleName = moduleName;
@@ -245,14 +256,14 @@ export function verifyFormInformation() {
                         //verify weight is an integer
                         let weightValid = true;
                         const moduleWeight = getIntegerInputValue(modEntry, elementSelectors.pool.moduleName);
-                        if (moduleWeight != Number(findTextInputElement(modEntry, elementSelectors.pool.moduleWeight))) {
-                            addError(errors, findTextInputElement(modEntry, elementSelectors.pool.moduleWeight), "Weight must be an integer.");
+                        if (moduleWeight != Number(findInputElement(modEntry, elementSelectors.pool.moduleWeight))) {
+                            addError(errors, findInputElement(modEntry, elementSelectors.pool.moduleWeight), "Weight must be an integer.");
                             weightValid = false;
                         }
                         //verify the weight is between 1 - 50. 
                         if (moduleWeight < 1 || moduleWeight > 50) {
                             errors.push("Module weight should be between 1 and 50 inclusively");
-                            markFieldInvalid(findTextInputElement(modEntry, elementSelectors.pool.moduleWeight), "Module weight should be between 1 and 50 inclusively");
+                            markFieldInvalid(findInputElement(modEntry, elementSelectors.pool.moduleWeight), "Module weight should be between 1 and 50 inclusively");
                             weightValid = false;
                         }
                         if (weightValid) {
@@ -267,14 +278,14 @@ export function verifyFormInformation() {
                     //verify module name is not empty
                     const moduleName = getSelectValue(poolFieldSet, elementSelectors.pool.moduleName);
                     if (!modulesByName.has(moduleName)) {
-                        addError(errors, findTextInputElement(poolFieldSet, elementSelectors.pool.moduleName), `"${moduleName}" is not a valid module name.`);
+                        addError(errors, findInputElement(poolFieldSet, elementSelectors.pool.moduleName), `"${moduleName}" is not a valid module name.`);
                     }
                     else {
                         pool.moduleName = moduleName;
                     }
                     break;
             }
-            pool.distinct = findTextInputElement(poolFieldSet, elementSelectors.pool.distinct).checked;
+            pool.distinct = findInputElement(poolFieldSet, elementSelectors.pool.distinct).checked;
             bomb.pools.push(pool);
         }
         mission.bombs.push(bomb);
@@ -350,13 +361,13 @@ function getTextAreaValue(container, selector) {
     return input.value.trim();
 }
 /**
- * Finds a text input within the specified container.
+ * Finds a input element within the specified container.
  *
  * @param container - The element or document to search within.
  * @param selector - CSS selector used to locate the input.
  * @returns The matching input element, or null if no matching element is found.
  */
-function findTextInputElement(container, selector) {
+function findInputElement(container, selector) {
     return container.querySelector(selector);
 }
 /**
@@ -368,7 +379,7 @@ function findTextInputElement(container, selector) {
  * @throws Error if no matching input element is found.
  */
 function getTextInputValue(container, selector) {
-    const input = findTextInputElement(container, selector);
+    const input = findInputElement(container, selector);
     if (!input) {
         throw getFindElementError(container, selector);
     }
