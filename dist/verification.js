@@ -3,6 +3,7 @@
 import { getModulesByName } from "./modules.js";
 const FIELD_INVALID_CLASS = "field-invalid";
 const FIELD_ERROR_CLASS = "field-error";
+const DAYS_TO_SECONDS = 86400;
 // Clears every validation marker (invalid labels/fieldsets and error messages)
 // left over from a previous validation pass.
 function clearAllFieldErrors() {
@@ -162,9 +163,14 @@ export function verifyFormInformation() {
             if (typeof time === "string") {
                 addError(errors, timeFieldSet, time);
             }
+            //use default time if time is the same
+            else if (getBombTimeInSeconds(time) == getBombTimeInSeconds(defaultBomb.time)) {
+                bomb.useDefaultTime = true;
+            }
             else {
                 bomb.time = time;
             }
+            console.log("use default time: ", bomb.useDefaultTime);
         }
         //strikes
         let useDefaultStrikes = bombFieldSet.querySelector(elementSelectors.bomb.useDefaultStrikes).checked;
@@ -173,6 +179,10 @@ export function verifyFormInformation() {
             const strikes = validStrikes(bombFieldSet, elementSelectors.bomb.strikes);
             if (typeof (strikes) === "string") {
                 addError(errors, findInputElement(bombFieldSet, elementSelectors.bomb.strikes), strikes);
+            }
+            //use default strikes if strikes is the same
+            else if (strikes == defaultBomb.strikes) {
+                bomb.useDefaultStrikes = true;
             }
             else {
                 bomb.strikes = strikes;
@@ -186,6 +196,10 @@ export function verifyFormInformation() {
             if (typeof (widgets) === "string") {
                 addError(errors, findInputElement(bombFieldSet, elementSelectors.bomb.widgets), widgets);
             }
+            //use default widgets if widgets is the same
+            else if (widgets == defaultBomb.widgets) {
+                bomb.useDefaultWidgets = true;
+            }
             else {
                 bomb.widgets = widgets;
             }
@@ -197,6 +211,10 @@ export function verifyFormInformation() {
             const needyTime = validNeedyTime(bombFieldSet, elementSelectors.bomb.needyTime);
             if (typeof (needyTime) === "string") {
                 addError(errors, findInputElement(bombFieldSet, elementSelectors.bomb.needyTime), needyTime);
+            }
+            //use default needy time if needy time is the same
+            else if (needyTime == defaultBomb.needyActivationTime) {
+                bomb.useDefaultNeedyActivationTime = true;
             }
             else {
                 bomb.needyActivationTime = needyTime;
@@ -298,15 +316,11 @@ export function verifyFormInformation() {
 // If there is an error, return a string, otherwise return the bomb time
 function validBombTime(fieldset, daySelector, hourSelector, minuteSelector, secondSelector) {
     // Bomb Time is max 6 days
-    const DAYS_TO_SECONDS = 86400;
     const days = getIntegerInputValue(fieldset, daySelector);
     const hours = getIntegerInputValue(fieldset, hourSelector);
     const minutes = getIntegerInputValue(fieldset, minuteSelector);
     const seconds = getIntegerInputValue(fieldset, secondSelector);
-    const totalBombTime = days * DAYS_TO_SECONDS +
-        hours * 3600 +
-        minutes * 60 +
-        seconds;
+    const totalBombTime = getBombTimeInSeconds(days, hours, minutes, seconds);
     return totalBombTime / DAYS_TO_SECONDS > 6 ?
         "Bomb time cannot go above 6 days" :
         {
@@ -411,5 +425,19 @@ function getSelectValue(container, selector) {
         throw getFindElementError(container, selector);
     }
     return element.value;
+}
+function getBombTimeInSeconds(timeOrDays, hours, minutes, seconds) {
+    const time = typeof timeOrDays === "number"
+        ? {
+            days: timeOrDays,
+            hours: hours,
+            minutes: minutes,
+            seconds: seconds
+        }
+        : timeOrDays;
+    return time.days * DAYS_TO_SECONDS +
+        time.hours * 3600 +
+        time.minutes * 60 +
+        time.seconds;
 }
 //# sourceMappingURL=verification.js.map

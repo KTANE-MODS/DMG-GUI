@@ -1,11 +1,5 @@
 import { getModulesByName } from "./modules.js";
 import { saveTextFile } from "./io.js";
-/* //todo: if any of the following are the same as the default, don't include it for a individual bomb:
-    time
-    strikes
-    widget
-    needy time
-*/
 export async function generateDMGText(mission) {
     let modulesByName = getModulesByName();
     let missionStr = "";
@@ -34,7 +28,7 @@ export async function generateDMGText(mission) {
     missionStr += getWidgets(mission.defaultBomb.widgets);
     //default needy time
     missionStr += getNeedyActivationTime(mission.defaultBomb.needyActivationTime);
-    //todo bombs
+    //bombs
     for (let bomb of mission.bombs) {
         let bombStr = `(\n`;
         //time

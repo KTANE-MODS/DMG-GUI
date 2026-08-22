@@ -6,6 +6,7 @@ import { Bomb, BombTime, DefaultBomb, FactoryMode, Mission, ModuleEntry, Pool, P
 
 const FIELD_INVALID_CLASS = "field-invalid";
 const FIELD_ERROR_CLASS = "field-error";
+const DAYS_TO_SECONDS = 86400;
 
 // Clears every validation marker (invalid labels/fieldsets and error messages)
 // left over from a previous validation pass.
@@ -214,9 +215,16 @@ export function verifyFormInformation(): Mission | null {
                 addError(errors, timeFieldSet, time)
             }
 
+            //use default time if time is the same
+            else if(getBombTimeInSeconds(time as BombTime) == getBombTimeInSeconds(defaultBomb.time)) {
+                bomb.useDefaultTime = true;
+            }
+
             else {
                 bomb.time = time;
             }
+
+            console.log("use default time: ", bomb.useDefaultTime)
         }
 
         //strikes
@@ -229,6 +237,12 @@ export function verifyFormInformation(): Mission | null {
             if (typeof (strikes) === "string") {
                 addError(errors, findInputElement(bombFieldSet, elementSelectors.bomb.strikes), strikes);
             }
+
+            //use default strikes if strikes is the same
+            else if(strikes == defaultBomb.strikes) {
+                bomb.useDefaultStrikes = true;
+            }
+
             else {
                 bomb.strikes = strikes;
             }
@@ -242,6 +256,12 @@ export function verifyFormInformation(): Mission | null {
             if (typeof (widgets) === "string") {
                 addError(errors, findInputElement(bombFieldSet, elementSelectors.bomb.widgets), widgets);
             }
+
+            //use default widgets if widgets is the same
+            else if(widgets == defaultBomb.widgets) {
+                bomb.useDefaultWidgets = true;
+            }
+
             else {
                 bomb.widgets = widgets;
             }
@@ -256,6 +276,12 @@ export function verifyFormInformation(): Mission | null {
             if (typeof (needyTime) === "string") {
                 addError(errors, findInputElement(bombFieldSet, elementSelectors.bomb.needyTime), needyTime);
             }
+
+            //use default needy time if needy time is the same
+            else if(needyTime == defaultBomb.needyActivationTime) {
+                bomb.useDefaultNeedyActivationTime = true;
+            }
+
             else {
                 bomb.needyActivationTime = needyTime;
             }
@@ -387,16 +413,13 @@ export function verifyFormInformation(): Mission | null {
 // If there is an error, return a string, otherwise return the bomb time
 function validBombTime(fieldset: HTMLFieldSetElement, daySelector: string, hourSelector: string, minuteSelector: string, secondSelector: string): string | BombTime {
     // Bomb Time is max 6 days
-    const DAYS_TO_SECONDS = 86400;
+    
     const days = getIntegerInputValue(fieldset, daySelector);
     const hours = getIntegerInputValue(fieldset, hourSelector);
     const minutes = getIntegerInputValue(fieldset, minuteSelector);
     const seconds = getIntegerInputValue(fieldset, secondSelector);
 
-    const totalBombTime = days * DAYS_TO_SECONDS +
-        hours * 3600 +
-        minutes * 60 +
-        seconds;
+    const totalBombTime = getBombTimeInSeconds(days, hours, minutes, seconds)
 
     return totalBombTime / DAYS_TO_SECONDS > 6 ?
         "Bomb time cannot go above 6 days" :
@@ -421,10 +444,7 @@ function validStrikes(parentFieldset: HTMLFieldSetElement, strikeSelector: strin
 function validNeedyTime(parentFieldset: HTMLFieldSetElement, selector: string): string | number {
     const time = getIntegerInputValue(parentFieldset, selector);
     return time < 0 ? "Needy Activation Time cannot be below 0 seconds" : time
-
-
 }
-
 
 function addError(errorArr: string[], element: Element | null, error: string) {
     errorArr.push(error);
@@ -518,10 +538,25 @@ function getSelectValue(container: Element | Document, selector: string): string
     }
     return element.value;
 }
+function getBombTimeInSeconds(time: BombTime): number;
+function getBombTimeInSeconds(days: number, hours: number, minutes: number, seconds: number): number;
+function getBombTimeInSeconds(
+    timeOrDays: BombTime | number,
+    hours?: number,
+    minutes?: number,
+    seconds?: number
+): number {
+    const time: BombTime = typeof timeOrDays === "number"
+        ? {
+            days: timeOrDays,
+            hours: hours!,
+            minutes: minutes!,
+            seconds: seconds!
+        }
+        : timeOrDays;
 
-
-
-
-
-
-
+    return (time.days as number) * DAYS_TO_SECONDS +
+           (time.hours as number) * 3600 +
+           (time.minutes as number) * 60 +
+           (time.seconds as number);
+}
