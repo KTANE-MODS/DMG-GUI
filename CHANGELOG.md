@@ -1,4 +1,4 @@
-## [1.1.0] - 2026-07-25
+## [1.1.0] - 2026-08-22
 ### Added
 - Default bomb info to remove duplicate dmg lines
 ### Changed
